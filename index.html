@@ -2056,6 +2056,7 @@
                 this.upcomingTurns = []; // Pre-calculated upcoming turns
                 this.ACTION_THRESHOLD = 1000; // Action bar threshold
                 this.isProcessingTurn = false; // Flag to prevent multiple attacks in one turn
+                this.attackButtonsDisabled = false; // Flag to disable attack buttons
             }
 
             setDifficulty(difficulty) {
@@ -2115,6 +2116,10 @@
                 this.battlePhase = 'battle';
                 this.battleLog = [];
                 this.previousFirstTurn = null;
+                
+                // Reset attack button states
+                this.attackButtonsDisabled = false;
+                this.isProcessingTurn = false;
                 
                 this.renderBattleArena();
                 
@@ -2288,6 +2293,10 @@
                     this.nextTurnTimer = null;
                     this.processAITurn();
                 }, 2500);
+                } else if (nextChar && nextChar.isPlayer) {
+                    // Re-enable attack buttons when it's the player's turn
+                    this.attackButtonsDisabled = false;
+                    this.isProcessingTurn = false;
                 }
             }
 
@@ -2618,6 +2627,7 @@
                 this.clearAllTimers(); // Add this line
                 this.battlePhase = 'ended';
                 this.isProcessingTurn = false; // Reset the flag
+                this.attackButtonsDisabled = false; // Reset attack buttons
                 const message = playerWon ? 'Victory! You won the battle!' : 'Defeat! Better luck next time!';
                 const teamClass = playerWon ? 'player-attack' : 'enemy-attack';
                 this.addBattleLog(message, `super-effective ${teamClass}`);
@@ -2880,6 +2890,11 @@
                         const button = document.createElement('button');
                         button.className = 'attack-btn';
                         
+                        // Disable button if attack buttons are disabled
+                        if (this.attackButtonsDisabled) {
+                            button.disabled = true;
+                        }
+                        
                         if (attackObj.type === 'splash') {
                             button.textContent = `${attackObj.gene} Splash ⇶`;
                             button.style.setProperty('--attack-color', GENE_DARK_COLORS[attackObj.gene]);
@@ -2907,10 +2922,14 @@
             }
 
             selectAttackGene(attackObj) {
-                // Prevent selecting attack if already processing a turn
-                if (this.isProcessingTurn) {
+                // Prevent selecting attack if already processing a turn or buttons are disabled
+                if (this.isProcessingTurn || this.attackButtonsDisabled) {
                     return;
                 }
+                
+                // Disable attack buttons immediately after clicking
+                this.attackButtonsDisabled = true;
+                this.updateBattleControls(); // Refresh the UI to show disabled state
                 
                 this.selectedAttackObj = attackObj;
                 this.showTargetSelection();
@@ -2959,6 +2978,10 @@
                         if (this.isProcessingTurn) {
                             return;
                         }
+                        
+                        // Disable all target buttons immediately after clicking
+                        const allTargetButtons = targetContainer.querySelectorAll('button');
+                        allTargetButtons.forEach(btn => btn.disabled = true);
                         
                         await this.showAttackAnimation(this.getCurrentCharacter(), target);
                         this.processTurn(this.selectedAttackObj, target);
