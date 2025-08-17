@@ -1392,7 +1392,7 @@
             
             /* REMOVE WASTED SPACE - tight battle arena */
             .battle-arena {
-                padding-bottom: 120px !important; /* Reduced since controls are now positioned higher */
+                padding-bottom: 140px !important; /* Increased space for controls */
                 gap: 5px !important;
                 padding-top: 0 !important;
                 display: flex !important;
@@ -1411,26 +1411,26 @@
                 flex-grow: 0 !important; /* Don't let it expand */
             }
             
-            /* LARGER, MORE USER-FRIENDLY battle controls */
+            /* IMPROVED battle controls positioning and sizing */
             .battle-controls {
-                padding: 20px !important;
+                padding: 15px !important;
                 position: fixed !important;
-                bottom: 20px !important; /* Move up from bottom edge */
+                bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
                 left: 10px !important;
                 right: 10px !important;
                 background: rgba(255, 255, 255, 0.98) !important;
                 border-radius: 20px !important;
-                max-height: 180px !important;
+                max-height: 200px !important; /* Increased height */
                 overflow-y: auto !important;
                 z-index: 1000 !important;
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-                margin-bottom: 20px !important; /* Add bottom margin for safe area */
+                margin-bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
             }
             
             /* Larger controls header */
             .battle-controls > div:first-child {
-                margin-bottom: 15px !important;
-                font-size: 18px !important;
+                margin-bottom: 12px !important;
+                font-size: 16px !important;
                 font-weight: bold !important;
                 display: flex;
                 justify-content: space-between;
@@ -1447,27 +1447,27 @@
             
             /* "Select an attack:" text */
             .attack-buttons > div:first-child {
-                font-size: 16px !important;
-                margin-bottom: 12px !important;
+                font-size: 15px !important;
+                margin-bottom: 10px !important;
                 font-weight: 500 !important;
             }
             
-            /* MUCH LARGER attack buttons */
+            /* IMPROVED attack buttons layout */
             .attack-buttons {
                 flex-direction: row !important;
-                gap: 12px !important; /* Reduce gap for better fit */
+                gap: 8px !important; /* Reduced gap for better fit */
                 justify-content: center;
                 flex-wrap: wrap;
                 margin-bottom: 0;
             }
             
             .attack-btn {
-                min-width: 140px !important; /* Slightly smaller for better fit */
-                max-width: 160px !important; /* Prevent buttons from getting too wide */
-                padding: 14px 20px !important; /* Slightly smaller padding */
-                font-size: 16px !important; /* Slightly smaller font */
+                min-width: 130px !important; /* Smaller for better fit */
+                max-width: 150px !important; /* Prevent buttons from getting too wide */
+                padding: 12px 16px !important; /* Smaller padding */
+                font-size: 14px !important; /* Smaller font */
                 font-weight: bold !important;
-                border-radius: 18px !important;
+                border-radius: 16px !important;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 flex: 1 1 auto !important; /* Allow flexible sizing */
             }
@@ -1480,7 +1480,7 @@
             /* Container adjustments */
             .game-container {
                 padding: 8px !important;
-                padding-bottom: 80px !important; /* Add safe area at bottom */
+                padding-bottom: 100px !important; /* Increased safe area at bottom */
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
@@ -1510,7 +1510,7 @@
             
             /* Ensure battle arena has proper spacing */
             .battle-arena {
-                padding-bottom: 100px !important; /* Space for controls */
+                padding-bottom: 120px !important; /* Space for controls */
             }
             
             /* Improve button touch targets */
@@ -1520,7 +1520,7 @@
             
             /* Better spacing for attack selection text */
             .attack-buttons > div:first-child {
-                margin-bottom: 15px !important;
+                margin-bottom: 12px !important;
                 padding: 0 10px !important;
             }
             
@@ -1558,23 +1558,43 @@
                 opacity: 0.8;
             }
             
-            /* Target selection button improvements */
+            /* FIXED target selection button layout - ensure all 3 buttons fit */
             .attack-buttons .attack-btn[style*="background"] {
-                min-width: 120px !important; /* Smaller for target buttons */
-                max-width: 140px !important;
-                padding: 12px 16px !important;
-                font-size: 14px !important;
+                min-width: 100px !important; /* Smaller for target buttons */
+                max-width: 120px !important;
+                padding: 10px 12px !important;
+                font-size: 12px !important;
                 margin: 2px !important;
-                flex: 1 1 120px !important; /* Fixed basis for consistent sizing */
+                flex: 1 1 100px !important; /* Fixed basis for consistent sizing */
+                white-space: nowrap !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
             }
             
-            /* Ensure target container fits properly */
+            /* Ensure target container fits properly with all 3 buttons */
             .attack-buttons > div:last-child {
                 display: flex !important;
-                gap: 8px !important;
+                gap: 6px !important; /* Reduced gap */
                 justify-content: center !important;
                 flex-wrap: wrap !important;
                 width: 100% !important;
+                max-width: 100% !important;
+                padding: 0 5px !important; /* Add small padding for edge spacing */
+            }
+            
+            /* Additional responsive adjustments for very small screens */
+            @media (max-width: 360px) {
+                .attack-buttons .attack-btn[style*="background"] {
+                    min-width: 90px !important;
+                    max-width: 110px !important;
+                    padding: 8px 10px !important;
+                    font-size: 11px !important;
+                    flex: 1 1 90px !important;
+                }
+                
+                .attack-buttons > div:last-child {
+                    gap: 4px !important;
+                }
             }
             
             /* Mobile-optimized damage numbers with effectiveness indicators */
@@ -3045,7 +3065,11 @@
                 
                 const targetContainer = document.createElement('div');
                 targetContainer.style.display = 'flex';
-                targetContainer.style.gap = '8px';
+                
+                // Mobile-optimized gap for target container
+                const isMobile = window.innerWidth <= 768;
+                targetContainer.style.gap = isMobile ? '6px' : '8px';
+                
                 targetContainer.style.justifyContent = 'center';
                 targetContainer.style.flexWrap = 'wrap';
                 targetContainer.style.width = '100%';
@@ -3068,9 +3092,20 @@
                     button.textContent = target.id;
                     button.style.color = 'white';
                     button.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)';
-                    button.style.minWidth = '120px';
-                    button.style.maxWidth = '140px';
-                    button.style.flex = '1 1 120px';
+                    
+                    // Mobile-optimized sizing for target buttons
+                    const isMobile = window.innerWidth <= 768;
+                    if (isMobile) {
+                        button.style.minWidth = '100px';
+                        button.style.maxWidth = '120px';
+                        button.style.flex = '1 1 100px';
+                        button.style.fontSize = '12px';
+                        button.style.padding = '10px 12px';
+                    } else {
+                        button.style.minWidth = '120px';
+                        button.style.maxWidth = '140px';
+                        button.style.flex = '1 1 120px';
+                    }
                     
                     button.addEventListener('click', async () => {
                         // Prevent multiple clicks during turn processing
