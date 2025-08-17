@@ -1183,6 +1183,28 @@
                 0px 2px 4px rgba(230, 81, 0, 0.6);
         }
 
+        .damage-number.extremely-effective {
+            color: #4caf50;
+            font-size: 40px;
+            text-shadow: 
+                2px 2px 0px #2e7d32,
+                -2px -2px 0px #2e7d32,
+                2px -2px 0px #2e7d32,
+                -2px 2px 0px #2e7d32,
+                0px 3px 6px rgba(46, 125, 50, 0.8);
+        }
+
+        .damage-number.extremely-weak {
+            color: #9e9e9e;
+            font-size: 16px;
+            text-shadow: 
+                1px 1px 0px #424242,
+                -1px -1px 0px #424242,
+                1px -1px 0px #424242,
+                -1px 1px 0px #424242,
+                0px 2px 4px rgba(66, 66, 66, 0.6);
+        }
+
         @keyframes damageFloat {
             0% {
                 transform: translateY(0) scale(0.8);
@@ -1619,6 +1641,16 @@
                 font-size: 20px !important;
                 background: rgba(230, 81, 0, 0.8) !important;
             }
+            
+            .damage-number.extremely-effective {
+                font-size: 32px !important;
+                background: rgba(46, 125, 50, 0.9) !important;
+            }
+            
+            .damage-number.extremely-weak {
+                font-size: 18px !important;
+                background: rgba(66, 66, 66, 0.8) !important;
+            }
         }
 
         .difficulty-btn {
@@ -1816,6 +1848,30 @@
         /* Speed debuff effect */
         .battle-character.speed-debuff .battle-sprite {
             filter: brightness(0.7) saturate(0.5);
+        }
+
+        /* Momentum effect */
+        .battle-character.momentum .battle-sprite {
+            animation: momentumGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes momentumGlow {
+            0%, 100% { 
+                filter: brightness(1) drop-shadow(0 0 5px #42a5f5);
+            }
+            50% { 
+                filter: brightness(1.2) drop-shadow(0 0 15px #42a5f5);
+            }
+        }
+
+        /* Orange armor effect */
+        .battle-character.armor .battle-sprite {
+            filter: drop-shadow(0 0 8px #ff8a65);
+        }
+
+        /* Green thorn effect */
+        .battle-character.thorn .battle-sprite {
+            filter: drop-shadow(0 0 6px #66bb6a);
         }
     </style>
 </head>
@@ -2049,37 +2105,37 @@
         const SPECIAL_ABILITIES = {
             'Red': {
                 name: 'Blood Rage',
-                description: 'Gain +32 damage and invisibility when HP drops below 75%',
+                description: 'Become invisible and gain +25% damage effectiveness when HP drops below 75%',
                 trigger: 'passive',
-                effect: 'rage'
+                effect: 'blood_rage'
             },
             'Orange': {
                 name: 'Molten Armor',
-                description: 'All incoming damage reduced by 16 points (minimum 1)',
+                description: 'Reduce all incoming damage by 16 points (minimum 1 damage taken)',
                 trigger: 'passive',
                 effect: 'damage_reduction'
             },
             'Yellow': {
                 name: 'Solar Recovery',
-                description: 'Heal 48 HP at the start of each turn',
+                description: 'Heal HP equal to attack damage at start of each turn',
                 trigger: 'turn_start',
                 effect: 'healing'
             },
             'Green': {
                 name: 'Thorn Skin',
-                description: 'Reflect 50% of attacker\'s base damage when hit',
+                description: 'Reflect 50% of incoming damage back to attacker',
                 trigger: 'passive',
                 effect: 'reflection'
             },
             'Blue': {
-                name: 'Frozen Trail',
-                description: 'Reduce target\'s speed by 24 for their next turn after attacking',
-                trigger: 'on_attack',
-                effect: 'speed_debuff'
+                name: 'Momentum',
+                description: 'Gain +8 speed permanently at start of each turn AND when attacked',
+                trigger: 'passive',
+                effect: 'momentum'
             },
             'Purple': {
                 name: 'Hex Mark',
-                description: 'Attacks apply "Cursed" status - target deals 25% less damage next turn',
+                description: 'Attacks reduce target\'s damage effectiveness by 25% for their next turn',
                 trigger: 'on_attack',
                 effect: 'curse'
             }
@@ -2111,7 +2167,9 @@
                     invisibility: { active: false, duration: 0 },
                     speedDebuff: { active: false, duration: 0, amount: 0 },
                     curse: { active: false, duration: 0 },
-                    rage: { active: false, bonusDamage: 0 }
+                    bloodRage: { active: false, damageBonus: 0 },
+                    momentum: { speedStacks: 0 },
+                    damageReduction: { active: false }
                 };
             }
 
@@ -2238,17 +2296,23 @@
 
             calculateDamage(attackGene, defendingCharacter) {
                 const baseDamage = this.stats.attack;
-                const effectiveness = this.getEffectiveness(attackGene, defendingCharacter);
+                let effectiveness = this.getEffectiveness(attackGene, defendingCharacter);
                 
-                // Add rage bonus damage if active
-                let finalDamage = baseDamage * effectiveness;
-                if (this.statusEffects.rage.active) {
-                    finalDamage += this.statusEffects.rage.bonusDamage;
+                // Apply Blood Rage damage bonus if active
+                if (this.statusEffects.bloodRage.active) {
+                    effectiveness += 0.25; // +25% damage effectiveness
                 }
                 
-                // Since all stats are divisible by 4, and effectiveness is 0.5, 0.75, 1.0, 1.25, or 1.5
+                // Apply curse damage reduction if active
+                if (this.statusEffects.curse.active) {
+                    effectiveness *= 0.75; // -25% damage effectiveness
+                }
+                
+                const finalDamage = baseDamage * effectiveness;
+                
+                // Since all stats are divisible by 4, and effectiveness modifiers are additive
                 // The result will always be a whole number
-                return finalDamage;
+                return Math.round(finalDamage);
             }
 
             assignSpecialAbility() {
@@ -2279,7 +2343,10 @@
             }
 
             getEffectiveSpeed() {
-                return Math.max(1, this.stats.speed - this.getSpeedDebuff());
+                // Base speed + momentum stacks - speed debuffs
+                const momentumBonus = this.statusEffects.momentum.speedStacks * 8;
+                const speedDebuff = this.getSpeedDebuff();
+                return Math.max(1, this.stats.speed + momentumBonus - speedDebuff);
             }
 
             applyDamageReduction(damage) {
@@ -2290,32 +2357,30 @@
             }
 
             triggerBloodRage() {
-                if (this.specialAbility && this.specialAbility.effect === 'rage' && 
-                    this.hp <= this.stats.maxHp * 0.75 && !this.statusEffects.rage.active) {
+                if (this.specialAbility && this.specialAbility.effect === 'blood_rage' && 
+                    this.hp <= this.stats.maxHp * 0.75 && !this.statusEffects.bloodRage.active) {
                     
-                    this.statusEffects.rage.active = true;
-                    this.statusEffects.rage.bonusDamage = 32;
+                    this.statusEffects.bloodRage.active = true;
+                    this.statusEffects.bloodRage.damageBonus = 0.25; // +25% damage effectiveness
                     this.statusEffects.invisibility.active = true;
                     this.statusEffects.invisibility.duration = 2;
                     
-                    return true; // Indicates rage was triggered
+                    return true; // Indicates blood rage was triggered
                 }
                 return false;
             }
 
             triggerThornSkin(attacker, damage) {
                 if (this.specialAbility && this.specialAbility.effect === 'reflection') {
-                    const reflectedDamage = Math.floor(attacker.stats.attack * 0.5);
+                    const reflectedDamage = Math.floor(damage * 0.5);
                     return reflectedDamage;
                 }
                 return 0;
             }
 
-            applySpeedDebuff(target, amount) {
-                if (this.specialAbility && this.specialAbility.effect === 'speed_debuff') {
-                    target.statusEffects.speedDebuff.active = true;
-                    target.statusEffects.speedDebuff.duration = 1;
-                    target.statusEffects.speedDebuff.amount = amount;
+            triggerMomentum() {
+                if (this.specialAbility && this.specialAbility.effect === 'momentum') {
+                    this.statusEffects.momentum.speedStacks++;
                     return true;
                 }
                 return false;
@@ -2332,7 +2397,8 @@
 
             healFromSolarRecovery() {
                 if (this.specialAbility && this.specialAbility.effect === 'healing') {
-                    const healAmount = 48;
+                    // Heal amount equal to attack damage (including gene effectiveness bonuses)
+                    const healAmount = this.stats.attack;
                     const oldHp = this.hp;
                     this.hp = Math.min(this.stats.maxHp, this.hp + healAmount);
                     return this.hp - oldHp; // Return actual amount healed
@@ -2347,6 +2413,11 @@
                     if (this.statusEffects.invisibility.duration <= 0) {
                         this.statusEffects.invisibility.active = false;
                         this.statusEffects.invisibility.duration = 0;
+                        // Clear blood rage when invisibility ends
+                        if (this.statusEffects.bloodRage.active) {
+                            this.statusEffects.bloodRage.active = false;
+                            this.statusEffects.bloodRage.damageBonus = 0;
+                        }
                     }
                 }
 
@@ -2451,7 +2522,9 @@
                         invisibility: { active: false, duration: 0 },
                         speedDebuff: { active: false, duration: 0, amount: 0 },
                         curse: { active: false, duration: 0 },
-                        rage: { active: false, bonusDamage: 0 }
+                        bloodRage: { active: false, damageBonus: 0 },
+                        momentum: { speedStacks: 0 },
+                        damageReduction: { active: false }
                     };
                 });
 
@@ -2499,7 +2572,9 @@
                             invisibility: { active: false, duration: 0 },
                             speedDebuff: { active: false, duration: 0, amount: 0 },
                             curse: { active: false, duration: 0 },
-                            rage: { active: false, bonusDamage: 0 }
+                            bloodRage: { active: false, damageBonus: 0 },
+                            momentum: { speedStacks: 0 },
+                            damageReduction: { active: false }
                         };
                         this.enemyTeam.push(enemyChar);
                     }
@@ -2515,7 +2590,9 @@
                             invisibility: { active: false, duration: 0 },
                             speedDebuff: { active: false, duration: 0, amount: 0 },
                             curse: { active: false, duration: 0 },
-                            rage: { active: false, bonusDamage: 0 }
+                            bloodRage: { active: false, damageBonus: 0 },
+                            momentum: { speedStacks: 0 },
+                            damageReduction: { active: false }
                         };
                         this.enemyTeam.push(enemyChar);
                         
@@ -2792,21 +2869,39 @@
                 const attackSymbol = attackGene === 'Neutral' ? '⚪' : GENE_SYMBOLS[attackGene];
                 const defenseSymbols = targetCharacter.genes.map(gene => GENE_SYMBOLS[gene]).join('');
                 
-                // Create detailed log message
+                // Create detailed log message with effectiveness stacking
                 let effectivenessText = '';
                 let logClass = 'damage';
+                let totalEffectiveness = effectiveness;
                 
-                if (effectiveness === 1.5) {
-                    effectivenessText = `🚑Very effective (+50%)`;
+                // Add Blood Rage bonus if active
+                if (attacker.statusEffects.bloodRage.active) {
+                    totalEffectiveness += 0.25;
+                }
+                
+                // Apply curse reduction if active
+                if (attacker.statusEffects.curse.active) {
+                    totalEffectiveness *= 0.75;
+                }
+                
+                // Determine effectiveness display
+                if (totalEffectiveness >= 1.75) {
+                    effectivenessText = `🪦Extremely effective (+${Math.round((totalEffectiveness - 1) * 100)}%)`;
                     logClass = 'super-effective';
-                } else if (effectiveness === 1.25) {
-                    effectivenessText = `📈Effective (+25%)`;
+                } else if (totalEffectiveness >= 1.5) {
+                    effectivenessText = `🚑Very effective (+${Math.round((totalEffectiveness - 1) * 100)}%)`;
                     logClass = 'super-effective';
-                } else if (effectiveness === 0.75) {
-                    effectivenessText = `📉Not too effective (-25%)`;
+                } else if (totalEffectiveness >= 1.25) {
+                    effectivenessText = `📈Effective (+${Math.round((totalEffectiveness - 1) * 100)}%)`;
+                    logClass = 'super-effective';
+                } else if (totalEffectiveness <= 0.25) {
+                    effectivenessText = `🕴️Extremely weak (-${Math.round((1 - totalEffectiveness) * 100)}%)`;
                     logClass = 'not-very-effective';
-                } else if (effectiveness === 0.5) {
-                    effectivenessText = `🗿Not effective at all (-50%)`;
+                } else if (totalEffectiveness <= 0.5) {
+                    effectivenessText = `🗿Not effective at all (-${Math.round((1 - totalEffectiveness) * 100)}%)`;
+                    logClass = 'not-very-effective';
+                } else if (totalEffectiveness <= 0.75) {
+                    effectivenessText = `📉Not too effective (-${Math.round((1 - totalEffectiveness) * 100)}%)`;
                     logClass = 'not-very-effective';
                 } else {
                     effectivenessText = `Normal damage`;
@@ -2822,13 +2917,18 @@
                     effectivenessText += ` | Armor (-${originalDamage - finalDamage})`;
                 }
                 
-                const detailedLog = `${attacker.id} (${attackSymbol}${attackGene}) → ${targetCharacter.id} (${defenseSymbols}${targetCharacter.genes.join('-')}) | Base: ${baseDamage} × ${effectiveness} = ${finalDamage} dmg | ${effectivenessText}`;
+                // Add Blood Rage effect to log if applicable
+                if (attacker.statusEffects.bloodRage.active) {
+                    effectivenessText += ` | Blood Rage (+25%)`;
+                }
+                
+                const detailedLog = `${attacker.id} (${attackSymbol}${attackGene}) → ${targetCharacter.id} (${defenseSymbols}${targetCharacter.genes.join('-')}) | Base: ${baseDamage} × ${totalEffectiveness.toFixed(2)} = ${finalDamage} dmg | ${effectivenessText}`;
                 
                 // Color code based on team
                 const teamClass = attacker.isPlayer ? 'player-attack' : 'enemy-attack';
                 this.addBattleLog(detailedLog, `${logClass} ${teamClass}`);
                 
-                this.showDamageAnimation(targetCharacter, finalDamage, effectiveness);
+                this.showDamageAnimation(targetCharacter, finalDamage, effectiveness, attacker);
                 
                 // Trigger Green's Thorn Skin reflection
                 const reflectedDamage = targetCharacter.triggerThornSkin(attacker, finalDamage);
@@ -2840,12 +2940,12 @@
                 
                 // Trigger Red's Blood Rage if HP drops below 75%
                 if (targetCharacter.triggerBloodRage()) {
-                    this.addBattleLog(`😤 ${targetCharacter.id} enters Blood Rage! +32 damage and invisibility for 2 turns!`, `super-effective ${teamClass}`);
+                    this.addBattleLog(`😤 ${targetCharacter.id} enters Blood Rage! +25% damage effectiveness and invisibility for 2 turns!`, `super-effective ${teamClass}`);
                 }
                 
-                // Apply Blue's Frozen Trail speed debuff
-                if (attacker.applySpeedDebuff(targetCharacter, 24)) {
-                    this.addBattleLog(`❄️ ${attacker.id}'s Frozen Trail reduces ${targetCharacter.id}'s speed by 24!`, `super-effective ${teamClass}`);
+                // Trigger Blue's Momentum when attacked
+                if (targetCharacter.triggerMomentum()) {
+                    this.addBattleLog(`⚡ ${targetCharacter.id} gains momentum! +8 speed (now ${targetCharacter.getEffectiveSpeed()})`, `super-effective ${teamClass}`);
                 }
                 
                 // Apply Purple's Hex Mark curse
@@ -2873,7 +2973,18 @@
                     const damageMultiplier = attacker.getDamageMultiplier();
                     
                     const baseDamage = attacker.stats.attack;
-                    const effectiveness = attacker.getEffectiveness(attackGene, target);
+                    let effectiveness = attacker.getEffectiveness(attackGene, target);
+                    
+                    // Apply Blood Rage damage bonus if active
+                    if (attacker.statusEffects.bloodRage.active) {
+                        effectiveness += 0.25; // +25% damage effectiveness
+                    }
+                    
+                    // Apply curse damage reduction if active
+                    if (attacker.statusEffects.curse.active) {
+                        effectiveness *= 0.75; // -25% damage effectiveness
+                    }
+                    
                     const singleDamage = baseDamage * effectiveness * damageMultiplier;
                     let splashDamage = singleDamage / 2;
                     
@@ -2884,7 +2995,7 @@
                     target.hp = Math.max(0, target.hp - splashDamage);
                     
                     const defenseSymbols = target.genes.map(gene => GENE_SYMBOLS[gene]).join('');
-                    let effectivenessText = `Base: ${baseDamage} × ${effectiveness} ÷ 2 = ${splashDamage} dmg`;
+                    let effectivenessText = `Base: ${baseDamage} × ${effectiveness.toFixed(2)} ÷ 2 = ${splashDamage} dmg`;
                     
                     // Add curse effect to log if applicable
                     if (damageMultiplier < 1.0) {
@@ -2896,10 +3007,15 @@
                         effectivenessText += ` | Armor (-${originalDamage - splashDamage})`;
                     }
                     
+                    // Add Blood Rage effect to log if applicable
+                    if (attacker.statusEffects.bloodRage.active) {
+                        effectivenessText += ` | Blood Rage (+25%)`;
+                    }
+                    
                     const detailedLog = `${attacker.id} (${GENE_SYMBOLS[attackGene]}${attackGene}) SPLASH → ${target.id} (${defenseSymbols}${target.genes.join('-')}) | ${effectivenessText}`;
                     
                     this.addBattleLog(detailedLog, `damage ${teamClass}`);
-                    this.showDamageAnimation(target, splashDamage, effectiveness);
+                    this.showDamageAnimation(target, splashDamage, effectiveness, attacker);
                     
                     // Trigger Green's Thorn Skin reflection
                     const reflectedDamage = target.triggerThornSkin(attacker, splashDamage);
@@ -2911,12 +3027,12 @@
                     
                     // Trigger Red's Blood Rage if HP drops below 75%
                     if (target.triggerBloodRage()) {
-                        this.addBattleLog(`😤 ${target.id} enters Blood Rage! +32 damage and invisibility for 2 turns!`, `super-effective ${teamClass}`);
+                        this.addBattleLog(`😤 ${target.id} enters Blood Rage! +25% damage effectiveness and invisibility for 2 turns!`, `super-effective ${teamClass}`);
                     }
                     
-                    // Apply Blue's Frozen Trail speed debuff
-                    if (attacker.applySpeedDebuff(target, 24)) {
-                        this.addBattleLog(`❄️ ${attacker.id}'s Frozen Trail reduces ${target.id}'s speed by 24!`, `super-effective ${teamClass}`);
+                    // Trigger Blue's Momentum when attacked
+                    if (target.triggerMomentum()) {
+                        this.addBattleLog(`⚡ ${target.id} gains momentum! +8 speed (now ${target.getEffectiveSpeed()})`, `super-effective ${teamClass}`);
                     }
                     
                     // Apply Purple's Hex Mark curse
@@ -3163,7 +3279,7 @@
                 });
             }
 
-            showDamageAnimation(targetCharacter, damage, effectiveness) {
+            showDamageAnimation(targetCharacter, damage, effectiveness, attacker = null) {
                 // Use both character ID and team to create unique selector
                 const teamPrefix = targetCharacter.isPlayer ? 'player' : 'enemy';
                 const targetElement = document.querySelector(`[data-battle-char="${targetCharacter.id}"][data-team="${teamPrefix}"]`);
@@ -3175,17 +3291,35 @@
                 
                 // Add effectiveness indicator with emote and percentage
                 let effectivenessIndicator = '';
-                if (effectiveness === 1.5) {
-                    effectivenessIndicator = ' 🚑(+50%)';
+                let totalEffectiveness = effectiveness;
+                
+                // Add Blood Rage bonus if active
+                if (attacker.statusEffects.bloodRage.active) {
+                    totalEffectiveness += 0.25;
+                }
+                
+                // Apply curse reduction if active
+                if (attacker.statusEffects.curse.active) {
+                    totalEffectiveness *= 0.75;
+                }
+                
+                if (totalEffectiveness >= 1.75) {
+                    effectivenessIndicator = ` 🪦(+${Math.round((totalEffectiveness - 1) * 100)}%)`;
+                    damageNum.classList.add('extremely-effective');
+                } else if (totalEffectiveness >= 1.5) {
+                    effectivenessIndicator = ` 🚑(+${Math.round((totalEffectiveness - 1) * 100)}%)`;
                     damageNum.classList.add('super-effective');
-                } else if (effectiveness === 1.25) {
-                    effectivenessIndicator = ' 📈(+25%)';
+                } else if (totalEffectiveness >= 1.25) {
+                    effectivenessIndicator = ` 📈(+${Math.round((totalEffectiveness - 1) * 100)}%)`;
                     damageNum.classList.add('super-effective');
-                } else if (effectiveness === 0.75) {
-                    effectivenessIndicator = ' 📉(-25%)';
+                } else if (totalEffectiveness <= 0.25) {
+                    effectivenessIndicator = ` 🕴️(-${Math.round((1 - totalEffectiveness) * 100)}%)`;
+                    damageNum.classList.add('extremely-weak');
+                } else if (totalEffectiveness <= 0.5) {
+                    effectivenessIndicator = ` 🗿(-${Math.round((1 - totalEffectiveness) * 100)}%)`;
                     damageNum.classList.add('not-very-effective');
-                } else if (effectiveness === 0.5) {
-                    effectivenessIndicator = ' 🗿(-50%)';
+                } else if (totalEffectiveness <= 0.75) {
+                    effectivenessIndicator = ` 📉(-${Math.round((1 - totalEffectiveness) * 100)}%)`;
                     damageNum.classList.add('not-very-effective');
                 }
                 
@@ -3291,7 +3425,7 @@
                 if (character.isInvisible()) {
                     div.classList.add('invisible');
                 }
-                if (character.statusEffects.rage.active) {
+                if (character.statusEffects.bloodRage.active) {
                     div.classList.add('rage');
                 }
                 if (character.isCursed()) {
@@ -3299,6 +3433,15 @@
                 }
                 if (character.statusEffects.speedDebuff.active) {
                     div.classList.add('speed-debuff');
+                }
+                if (character.statusEffects.momentum.speedStacks > 0) {
+                    div.classList.add('momentum');
+                }
+                if (character.specialAbility && character.specialAbility.effect === 'damage_reduction') {
+                    div.classList.add('armor');
+                }
+                if (character.specialAbility && character.specialAbility.effect === 'reflection') {
+                    div.classList.add('thorn');
                 }
                 
                 const sprite = document.createElement('div');
@@ -3336,16 +3479,29 @@
                 const stats = document.createElement('div');
                 stats.className = 'character-stats';
                 
-                // Show effective speed if different from base speed
+                // Show effective speed with momentum stacks
                 const effectiveSpeed = character.getEffectiveSpeed();
-                const speedText = effectiveSpeed !== character.stats.speed ? 
-                    `⚡ ${effectiveSpeed}(${character.stats.speed})` : 
-                    `⚡ ${character.stats.speed}`;
+                const momentumStacks = character.statusEffects.momentum.speedStacks;
+                let speedText = `⚡ ${character.stats.speed}`;
+                if (momentumStacks > 0) {
+                    speedText = `⚡ ${effectiveSpeed} (+${momentumStacks * 8})`;
+                } else if (effectiveSpeed !== character.stats.speed) {
+                    speedText = `⚡ ${effectiveSpeed} (${character.stats.speed})`;
+                }
+                
+                // Show attack with effectiveness modifiers
+                let attackText = `⚔️ ${character.stats.attack}`;
+                if (character.statusEffects.bloodRage.active) {
+                    attackText = `⚔️ ${character.stats.attack} (+25%)`;
+                }
+                if (character.statusEffects.curse.active) {
+                    attackText = `⚔️ ${character.stats.attack} (-25%)`;
+                }
                 
                 stats.innerHTML = `
                     <div>${character.id}</div>
                     <div>❤️ <strong>${character.hp}</strong>/${character.stats.maxHp}</div>
-                    <div>⚔️ ${character.stats.attack} | ${speedText}</div>
+                    <div>${attackText} | ${speedText}</div>
                 `;
                 
                 // Add status effect indicators
@@ -3374,10 +3530,10 @@
                     statusEffects.appendChild(curseIcon);
                 }
                 
-                if (character.statusEffects.rage.active) {
+                if (character.statusEffects.bloodRage.active) {
                     const rageIcon = document.createElement('span');
                     rageIcon.textContent = '😤';
-                    rageIcon.title = 'Blood Rage (+32 damage)';
+                    rageIcon.title = 'Blood Rage (+25% damage effectiveness)';
                     rageIcon.style.fontSize = '12px';
                     statusEffects.appendChild(rageIcon);
                 }
@@ -3388,6 +3544,30 @@
                     debuffIcon.title = `Speed reduced by ${character.statusEffects.speedDebuff.amount}`;
                     debuffIcon.style.fontSize = '12px';
                     statusEffects.appendChild(debuffIcon);
+                }
+                
+                if (character.statusEffects.momentum.speedStacks > 0) {
+                    const momentumIcon = document.createElement('span');
+                    momentumIcon.textContent = '⚡';
+                    momentumIcon.title = `Momentum: +${character.statusEffects.momentum.speedStacks * 8} speed`;
+                    momentumIcon.style.fontSize = '12px';
+                    statusEffects.appendChild(momentumIcon);
+                }
+                
+                if (character.specialAbility && character.specialAbility.effect === 'damage_reduction') {
+                    const armorIcon = document.createElement('span');
+                    armorIcon.textContent = '🛡️';
+                    armorIcon.title = 'Molten Armor (-16 damage)';
+                    armorIcon.style.fontSize = '12px';
+                    statusEffects.appendChild(armorIcon);
+                }
+                
+                if (character.specialAbility && character.specialAbility.effect === 'reflection') {
+                    const thornIcon = document.createElement('span');
+                    thornIcon.textContent = '🌵';
+                    thornIcon.title = 'Thorn Skin (50% reflection)';
+                    thornIcon.style.fontSize = '12px';
+                    statusEffects.appendChild(thornIcon);
                 }
                 
                 const healthBar = document.createElement('div');
@@ -3612,6 +3792,12 @@
                     
                     // Show healing animation
                     this.showHealingAnimation(character, healAmount);
+                }
+                
+                // Process Blue's Momentum at turn start
+                if (character.triggerMomentum()) {
+                    const teamClass = character.isPlayer ? 'player-attack' : 'enemy-attack';
+                    this.addBattleLog(`⚡ ${character.id}'s Momentum gains +8 speed at turn start! (now ${character.getEffectiveSpeed()})`, `super-effective ${teamClass}`);
                 }
             }
 
