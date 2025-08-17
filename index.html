@@ -1642,6 +1642,45 @@
         .battle-sprite.single-gene {
             background: linear-gradient(135deg, var(--gene-color), white) !important;
         }
+
+        /* Performance hints */
+        .battle-character,
+        .battle-sprite,
+        .damage-number,
+        .attack-btn,
+        .turn-indicator,
+        .character-slot,
+        .preview-character {
+            will-change: transform;
+        }
+
+        .breeding-table,
+        .selection-grid,
+        .turn-order-list,
+        .battle-team-display,
+        .battle-controls,
+        .game-container {
+            contain: layout paint;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+            .battle-shake {
+                animation: none !important;
+            }
+        }
+
+        /* Avoid rendering offscreen content */
+        .breeding-table,
+        .selection-grid,
+        .turn-order-list,
+        .battle-team-display {
+            content-visibility: auto;
+            contain-intrinsic-size: 300px;
+        }
     </style>
 </head>
 <body>
@@ -1879,6 +1918,59 @@
             'Purple': { 'Red': 1.5, 'Orange': 1.25, 'Blue': 0.5, 'Green': 0.75 }
         };
 
+        // Hoisted base stats map (avoid rebuilding on every call)
+        const STAT_MAP = {
+            'Red': [120, 120, 40],
+            'Orange': [240, 80, 40],
+            'Yellow': [360, 40, 40],
+            'Green': [240, 40, 80],
+            'Blue': [120, 40, 120],
+            'Purple': [120, 80, 80],
+
+            'Red-Red': [144, 104, 48],
+            'Orange-Orange': [216, 72, 56],
+            'Yellow-Yellow': [312, 48, 48],
+            'Green-Green': [216, 56, 72],
+            'Blue-Blue': [144, 48, 104],
+            'Purple-Purple': [168, 72, 72],
+
+            'Red-Orange': [216, 88, 40],
+            'Red-Yellow': [300, 60, 40],
+            'Red-Green': [216, 56, 72],
+            'Red-Blue': [120, 60, 100],
+            'Red-Purple': [120, 88, 72],
+
+            'Orange-Red': [156, 108, 40],
+            'Orange-Yellow': [324, 52, 40],
+            'Orange-Green': [240, 48, 72],
+            'Orange-Blue': [156, 52, 96],
+            'Orange-Purple': [144, 80, 72],
+
+            'Yellow-Red': [180, 100, 40],
+            'Yellow-Orange': [264, 72, 40],
+            'Yellow-Green': [264, 40, 72],
+            'Yellow-Blue': [180, 40, 100],
+            'Yellow-Purple': [168, 72, 72],
+
+            'Green-Red': [156, 96, 52],
+            'Green-Orange': [240, 72, 48],
+            'Green-Yellow': [324, 40, 52],
+            'Green-Blue': [156, 40, 108],
+            'Green-Purple': [144, 72, 80],
+
+            'Blue-Red': [120, 100, 60],
+            'Blue-Orange': [216, 72, 56],
+            'Blue-Yellow': [300, 40, 60],
+            'Blue-Green': [216, 40, 88],
+            'Blue-Purple': [120, 72, 88],
+
+            'Purple-Red': [120, 108, 52],
+            'Purple-Orange': [216, 80, 48],
+            'Purple-Yellow': [288, 52, 52],
+            'Purple-Green': [216, 48, 80],
+            'Purple-Blue': [120, 52, 108]
+        };
+
         class GameCharacter {
             constructor(id, genes, unlocked = false) {
                 this.id = id;
@@ -1897,65 +1989,7 @@
             }
 
             getStatDistribution() {
-                // Define base stats for all 42 characters (HP tripled for gameplay)
-                // Budget formula: (HP÷3) + Attack + Speed = 200 for all characters
-                // 40 minimum rule applied: no stat below 40
-                const statMap = {
-                    // Single genes (HP tripled, but (HP÷3) + ATK + SPD = 200)
-                    'Red': [120, 120, 40],        // (120÷3) + 120 + 40 = 200
-                    'Orange': [240, 80, 40],      // (240÷3) + 80 + 40 = 200  
-                    'Yellow': [360, 40, 40],      // (360÷3) + 40 + 40 = 200
-                    'Green': [240, 40, 80],       // (240÷3) + 40 + 80 = 200
-                    'Blue': [120, 40, 120],       // (120÷3) + 40 + 120 = 200
-                    'Purple': [120, 80, 80],      // (120÷3) + 80 + 80 = 200
-                    
-                    // Same-gene doubles (HP tripled, but (HP÷3) + ATK + SPD = 200)
-                    'Red-Red': [144, 104, 48],       // (144÷3) + 104 + 48 = 200
-                    'Orange-Orange': [216, 72, 56], // (216÷3) + 72 + 56 = 200
-                    'Yellow-Yellow': [312, 48, 48], // (312÷3) + 48 + 48 = 200
-                    'Green-Green': [216, 56, 72],   // (216÷3) + 56 + 72 = 200
-                    'Blue-Blue': [144, 48, 104],    // (144÷3) + 48 + 104 = 200
-                    'Purple-Purple': [168, 72, 72], // (168÷3) + 72 + 72 = 200
-                    
-                    // Different-gene doubles (HP tripled, 40 minimum rule applied)
-                    'Red-Orange': [216, 88, 40],    // (216÷3) + 88 + 40 = 200
-                    'Red-Yellow': [300, 60, 40],    // (300÷3) + 60 + 40 = 200
-                    'Red-Green': [216, 56, 72],     // (216÷3) + 56 + 72 = 200
-                    'Red-Blue': [120, 60, 100],     // (120÷3) + 60 + 100 = 200
-                    'Red-Purple': [120, 88, 72],    // (120÷3) + 88 + 72 = 200
-
-                    'Orange-Red': [156, 108, 40],   // (156÷3) + 108 + 40 = 200
-                    'Orange-Yellow': [324, 52, 40], // (324÷3) + 52 + 40 = 200
-                    'Orange-Green': [240, 48, 72],  // (240÷3) + 48 + 72 = 200
-                    'Orange-Blue': [156, 52, 96],   // (156÷3) + 52 + 96 = 200
-                    'Orange-Purple': [144, 80, 72], // (144÷3) + 80 + 72 = 200
-
-                    'Yellow-Red': [180, 100, 40],   // (180÷3) + 100 + 40 = 200
-                    'Yellow-Orange': [264, 72, 40], // (264÷3) + 72 + 40 = 200
-                    'Yellow-Green': [264, 40, 72],  // (264÷3) + 40 + 72 = 200
-                    'Yellow-Blue': [180, 40, 100],  // (180÷3) + 40 + 100 = 200
-                    'Yellow-Purple': [168, 72, 72], // (168÷3) + 72 + 72 = 200
-                    
-                    'Green-Red': [156, 96, 52],     // (156÷3) + 96 + 52 = 200
-                    'Green-Orange': [240, 72, 48],  // (240÷3) + 72 + 48 = 200
-                    'Green-Yellow': [324, 40, 52],  // (324÷3) + 40 + 52 = 200
-                    'Green-Blue': [156, 40, 108],   // (156÷3) + 40 + 108 = 200
-                    'Green-Purple': [144, 72, 80],  // (144÷3) + 72 + 80 = 200
-                    
-                    'Blue-Red': [120, 100, 60],     // (120÷3) + 100 + 60 = 200
-                    'Blue-Orange': [216, 72, 56],   // (216÷3) + 72 + 56 = 200
-                    'Blue-Yellow': [300, 40, 60],   // (300÷3) + 40 + 60 = 200
-                    'Blue-Green': [216, 40, 88],    // (216÷3) + 40 + 88 = 200
-                    'Blue-Purple': [120, 72, 88],   // (120÷3) + 72 + 88 = 200
-                    
-                    'Purple-Red': [120, 108, 52],   // (120÷3) + 108 + 52 = 200
-                    'Purple-Orange': [216, 80, 48], // (216÷3) + 80 + 48 = 200
-                    'Purple-Yellow': [288, 52, 52], // (288÷3) + 52 + 52 = 200
-                    'Purple-Green': [216, 48, 80],  // (216÷3) + 48 + 80 = 200
-                    'Purple-Blue': [120, 52, 108]   // (120÷3) + 52 + 108 = 200
-                };
-                
-                return statMap[this.id] || [80, 80, 80]; // Fallback for any missing characters
+                return STAT_MAP[this.id] || [80, 80, 80];
             }
 
             generateStats() {
@@ -2033,6 +2067,7 @@
                 this.turnHistory = []; // Track completed turns
                 this.upcomingTurns = []; // Pre-calculated upcoming turns
                 this.ACTION_THRESHOLD = 1000; // Action bar threshold
+                this._updateScheduled = false;
             }
 
             setDifficulty(difficulty) {
@@ -2056,16 +2091,32 @@
             showQuitConfirmation() {
                 const popup = document.createElement('div');
                 popup.className = 'confirmation-popup show';
-                popup.innerHTML = `
-                    <div class="confirmation-content">
-                        <h3 style="color: #666; margin-bottom: 15px;">Quit Battle?</h3>
-                        <p style="color: #888; margin-bottom: 20px;">Are you sure you want to quit this battle? Your progress will be lost.</p>
-                        <div class="confirmation-buttons">
-                            <button class="confirm-btn" id="confirmQuit">Yes, Quit</button>
-                            <button class="cancel-btn" id="cancelQuit">Cancel</button>
-                        </div>
-                    </div>
-                `;
+                const content = document.createElement('div');
+                content.className = 'confirmation-content';
+                const h3 = document.createElement('h3');
+                h3.style.color = '#666';
+                h3.style.marginBottom = '15px';
+                h3.textContent = 'Quit Battle?';
+                const p = document.createElement('p');
+                p.style.color = '#888';
+                p.style.marginBottom = '20px';
+                p.textContent = 'Are you sure you want to quit this battle? Your progress will be lost.';
+                const btns = document.createElement('div');
+                btns.className = 'confirmation-buttons';
+                const confirm = document.createElement('button');
+                confirm.className = 'confirm-btn';
+                confirm.id = 'confirmQuit';
+                confirm.textContent = 'Yes, Quit';
+                const cancel = document.createElement('button');
+                cancel.className = 'cancel-btn';
+                cancel.id = 'cancelQuit';
+                cancel.textContent = 'Cancel';
+                btns.appendChild(confirm);
+                btns.appendChild(cancel);
+                content.appendChild(h3);
+                content.appendChild(p);
+                content.appendChild(btns);
+                popup.appendChild(content);
                 
                 document.body.appendChild(popup);
                 
@@ -2685,7 +2736,7 @@
                     targetElement.style.removeProperty('--shake-intensity');
                 }, 600);
                 
-                setTimeout(() => this.updateBattleDisplay(), 200);
+                setTimeout(() => this.updateBattleDisplay(), 0);
             }
 
             addBattleLog(message, className = '') {
@@ -2696,9 +2747,13 @@
                 
                 const logElement = document.getElementById('battleLog');
                 if (logElement) {
-                    logElement.innerHTML = this.battleLog
-                        .map(log => `<div class="log-entry ${log.className}">${log.message}</div>`)
-                        .join('');
+                    const entry = document.createElement('div');
+                    entry.className = `log-entry ${className}`;
+                    entry.textContent = message;
+                    logElement.appendChild(entry);
+                    while (logElement.children.length > 10) {
+                        logElement.removeChild(logElement.firstChild);
+                    }
                     logElement.scrollTop = logElement.scrollHeight;
                 }
             }
@@ -2720,27 +2775,32 @@
             }
 
             updateBattleDisplay() {
-                this.updateTeamDisplays();
-                this.updateTurnOrder();
-                this.updateBattleControls();
+                if (this._updateScheduled) return;
+                this._updateScheduled = true;
+                requestAnimationFrame(() => {
+                    this._updateScheduled = false;
+                    this.updateTeamDisplays();
+                    this.updateTurnOrder();
+                    this.updateBattleControls();
+                });
             }
 
             updateTeamDisplays() {
-                // Update player team
+                // Update player team in a single batch to reduce reflows
                 const playerDisplay = document.getElementById('playerTeamDisplay');
-                playerDisplay.innerHTML = '';
+                const playerFragment = document.createDocumentFragment();
                 this.playerTeam.forEach(char => {
-                    const charElement = this.createBattleCharacterElement(char);
-                    playerDisplay.appendChild(charElement);
+                    playerFragment.appendChild(this.createBattleCharacterElement(char));
                 });
+                playerDisplay.replaceChildren(playerFragment);
                 
-                // Update enemy team
+                // Update enemy team in a single batch to reduce reflows
                 const enemyDisplay = document.getElementById('enemyTeamDisplay');
-                enemyDisplay.innerHTML = '';
+                const enemyFragment = document.createDocumentFragment();
                 this.enemyTeam.forEach(char => {
-                    const charElement = this.createBattleCharacterElement(char);
-                    enemyDisplay.appendChild(charElement);
+                    enemyFragment.appendChild(this.createBattleCharacterElement(char));
                 });
+                enemyDisplay.replaceChildren(enemyFragment);
             }
 
             createBattleCharacterElement(character) {
@@ -2766,11 +2826,15 @@
                 
                 const stats = document.createElement('div');
                     stats.className = 'character-stats';
-                    stats.innerHTML = `
-                        <div>${character.id}</div>
-                        <div>❤️ <strong>${character.hp}</strong>/${character.stats.maxHp}</div>
-                        <div>⚔️ ${character.stats.attack} | ⚡ ${character.stats.speed}</div>
-                    `;
+                    const nameDiv = document.createElement('div');
+                    nameDiv.textContent = character.id;
+                    const hpDiv = document.createElement('div');
+                    hpDiv.innerHTML = `❤️ <strong>${character.hp}</strong>/${character.stats.maxHp}`;
+                    const asDiv = document.createElement('div');
+                    asDiv.textContent = `⚔️ ${character.stats.attack} | ⚡ ${character.stats.speed}`;
+                    stats.appendChild(nameDiv);
+                    stats.appendChild(hpDiv);
+                    stats.appendChild(asDiv);
                 
                 const healthBar = document.createElement('div');
                 healthBar.className = 'health-bar';
@@ -2789,14 +2853,14 @@
 
             updateTurnOrder() {
                 const turnOrderList = document.getElementById('turnOrderList');
-                turnOrderList.innerHTML = '';
+                const fragment = document.createDocumentFragment();
                 
                 this.turnQueue.forEach((char, index) => {
                     const indicator = document.createElement('div');
                     indicator.className = 'turn-indicator';
                     indicator.classList.add(char.isPlayer ? 'player' : 'enemy');
                     
-                    if (index === this.currentTurnIndex % this.turnQueue.length) {
+                    if (this.turnQueue.length > 0 && index === (this.currentTurnIndex % this.turnQueue.length)) {
                         indicator.classList.add('active');
                     }
                     
@@ -2804,11 +2868,16 @@
                     if (char.genes.length === 1) {
                         indicator.textContent = GENE_SYMBOLS[char.genes[0]];
                     } else {
-                        indicator.innerHTML = `<span style="font-size: 10px;">${GENE_SYMBOLS[char.genes[0]]}${GENE_SYMBOLS[char.genes[1]]}</span>`;
+                        const span = document.createElement('span');
+                        span.style.fontSize = '10px';
+                        span.textContent = `${GENE_SYMBOLS[char.genes[0]]}${GENE_SYMBOLS[char.genes[1]]}`;
+                        indicator.appendChild(span);
                     }
                     
-                    turnOrderList.appendChild(indicator);
+                    fragment.appendChild(indicator);
                 });
+                
+                turnOrderList.replaceChildren(fragment);
             }
 
             updateBattleControls() {
@@ -2829,11 +2898,13 @@
                     
                     // Hide damage preview on mobile
                     const isMobile = window.innerWidth <= 768;
-                    if (isMobile) {
-                        attackButtonsElement.innerHTML = '<div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500;">Select an attack:</div>';
-                    } else {
-                        attackButtonsElement.innerHTML = '<div style="margin-bottom: 15px; color: #666;">Select an attack:</div>';
-                    }
+                    const header = document.createElement('div');
+                    header.style.marginBottom = isMobile ? '10px' : '15px';
+                    header.style.color = '#666';
+                    header.style.fontSize = isMobile ? '14px' : '';
+                    header.style.fontWeight = isMobile ? '500' : '';
+                    header.textContent = 'Select an attack:';
+                    attackButtonsElement.replaceChildren(header);
                     
                     const attackObjs = currentChar.getAttackGenes();
                     const buttonContainer = document.createElement('div');
@@ -2868,7 +2939,11 @@
                     attackButtonsElement.appendChild(buttonContainer);
                 } else {
                     controlsElement.style.display = 'block';
-                    attackButtonsElement.innerHTML = '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
+                    const thinking = document.createElement('div');
+                    thinking.style.textAlign = 'center';
+                    thinking.style.color = '#666';
+                    thinking.textContent = 'Enemy is thinking...';
+                    attackButtonsElement.replaceChildren(thinking);
                 }
             }
 
@@ -2888,7 +2963,12 @@
                 
                 const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
                 
-                attackButtonsElement.innerHTML = '<div style="margin-bottom: 15px; color: #666; font-weight: bold;">Select a target:</div>';
+                const header = document.createElement('div');
+                header.style.marginBottom = '15px';
+                header.style.color = '#666';
+                header.style.fontWeight = 'bold';
+                header.textContent = 'Select a target:';
+                attackButtonsElement.replaceChildren(header);
                 
                 const targetContainer = document.createElement('div');
                 targetContainer.style.display = 'flex';
@@ -3024,7 +3104,7 @@
 
             createTable() {
                 const table = document.getElementById('breedingTable');
-                table.innerHTML = '';
+                const fragment = document.createDocumentFragment();
 
                 // Create 7x6 grid: 6 columns for double genes + 1 column for singles
                 for (let row = 0; row < 6; row++) {
@@ -3033,13 +3113,15 @@
                         const primary = GENES[col];
                         const secondary = GENES[row];
                         const id = `${primary}-${secondary}`;
-                        this.createCharacterSlot(table, id);
+                        this.createCharacterSlot(fragment, id);
                     }
                     
                     // Single gene slot (7th column)
                     const singleGene = GENES[row];
-                    this.createCharacterSlot(table, singleGene);
+                    this.createCharacterSlot(fragment, singleGene);
                 }
+
+                table.replaceChildren(fragment);
             }
 
             createCharacterSlot(container, characterId) {
@@ -3056,10 +3138,8 @@
                 slot.appendChild(sprite);
                 container.appendChild(slot);
 
-                if (character.unlocked) {
-                    slot.addEventListener('click', () => this.selectCharacter(characterId));
-                }
             }
+            
 
             updateCharacterSprite(sprite, character) {
                 if (character.unlocked) {
@@ -3068,7 +3148,6 @@
                         sprite.className += ' single-gene';
                         sprite.style.setProperty('--gene-color', GENE_COLORS[character.genes[0]]);
                         sprite.textContent = character.symbol;
-                        sprite.innerHTML = character.symbol;
                     } else {
                         sprite.className = sprite.className.replace(/single-gene|double-gene|same-gene|different-genes|locked-sprite/g, '').trim();
                         sprite.className += ' double-gene';
@@ -3102,7 +3181,6 @@
                     sprite.className = sprite.className.replace(/single-gene|double-gene|same-gene|different-genes/g, '').trim();
                     sprite.className += ' locked-sprite';
                     sprite.textContent = '?';
-                    sprite.innerHTML = '?';
                     sprite.style.removeProperty('--gene-color');
                     sprite.style.removeProperty('--primary-color');
                     sprite.style.removeProperty('--secondary-color');
@@ -3178,7 +3256,6 @@
                     this.updateCharacterSprite(sprite, character);
                 } else {
                     sprite.textContent = '?';
-                    sprite.innerHTML = '?';
                     sprite.className = 'character-sprite locked-sprite';
                     sprite.style.removeProperty('--gene-color');
                     sprite.style.removeProperty('--primary-color');
@@ -3194,40 +3271,35 @@
                 
                 if (!selectionGrid) return;
                 
-                // Clear existing content
-                selectionGrid.innerHTML = '';
-                
-                // Add unlocked characters to selection
+                // Clear and repopulate using fragments to reduce layout thrash
+                const selectionFragment = document.createDocumentFragment();
                 const unlockedChars = Object.values(this.characters).filter(char => char.unlocked);
                 unlockedChars.forEach(character => {
                     const slot = document.createElement('div');
                     slot.className = 'selection-slot';
+                    slot.dataset.charId = character.id;
                     if (this.selectedBattleTeam.includes(character.id)) {
                         slot.classList.add('selected');
                     }
-                    
                     const sprite = document.createElement('div');
                     sprite.className = 'character-sprite';
                     this.updateCharacterSprite(sprite, character);
-                    
                     slot.appendChild(sprite);
-                    slot.addEventListener('click', () => this.toggleBattleTeamSelection(character.id));
-                    selectionGrid.appendChild(slot);
+                    selectionFragment.appendChild(slot);
                 });
+                selectionGrid.replaceChildren(selectionFragment);
                 
                 // Update selected team display
-                selectedTeamDisplay.innerHTML = '';
+                const teamFragment = document.createDocumentFragment();
                 this.selectedBattleTeam.forEach(charId => {
                     const character = this.characters[charId];
                     const slot = document.createElement('div');
                     slot.className = 'character-slot unlocked';
-                    
                     const sprite = document.createElement('div');
                     sprite.className = 'character-sprite';
                     this.updateCharacterSprite(sprite, character);
-                    
                     slot.appendChild(sprite);
-                    selectedTeamDisplay.appendChild(slot);
+                    teamFragment.appendChild(slot);
                 });
                 
                 // Add empty slots
@@ -3238,8 +3310,9 @@
                     sprite.className = 'character-sprite locked-sprite';
                     sprite.textContent = '?';
                     slot.appendChild(sprite);
-                    selectedTeamDisplay.appendChild(slot);
+                    teamFragment.appendChild(slot);
                 }
+                selectedTeamDisplay.replaceChildren(teamFragment);
                 
                 // Update start battle button
                 if (this.selectedBattleTeam.length === 3) {
@@ -3328,7 +3401,6 @@
                     previewChar.className += ' single-gene';
                     previewChar.style.setProperty('--gene-color', GENE_COLORS[character.genes[0]]);
                     previewChar.textContent = character.symbol;
-                    previewChar.innerHTML = character.symbol;
                 } else {
                     const isSameGene = character.genes[0] === character.genes[1];
                     previewChar.className += ' double-gene';
@@ -3529,6 +3601,28 @@
                         this.setSpeed(speed);
                     });
                 });
+
+                // Delegate clicks for battle selection to reduce listeners
+                const selectionGrid = document.getElementById('battleCharacterSelection');
+                if (selectionGrid) {
+                    selectionGrid.addEventListener('click', (e) => {
+                        const slot = e.target.closest('.selection-slot');
+                        if (!slot || !selectionGrid.contains(slot)) return;
+                        const charId = slot.dataset.charId;
+                        if (charId) this.toggleBattleTeamSelection(charId);
+                    });
+                }
+
+                // Delegate clicks for breeding table to reduce per-slot listeners
+                const breedingTable = document.getElementById('breedingTable');
+                if (breedingTable) {
+                    breedingTable.addEventListener('click', (e) => {
+                        const slot = e.target.closest('.character-slot.unlocked');
+                        if (!slot || !breedingTable.contains(slot)) return;
+                        const charId = slot.dataset.characterId;
+                        if (charId) this.selectCharacter(charId);
+                    });
+                }
             }
 
             showResetConfirmation() {
