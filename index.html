@@ -1387,35 +1387,35 @@
             
             /* REMOVE WASTED SPACE - tight battle arena */
             .battle-arena {
-                padding-bottom: 180px !important;
-                gap: 8px !important;
+                padding-bottom: 200px !important;
+                gap: 5px !important;
                 padding-top: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
                 justify-content: flex-start !important;
-                min-height: calc(100vh - 180px) !important;
+                min-height: calc(100vh - 200px) !important;
             }
             
             /* Remove extra space around team sections */
             .team-section.player-team {
-                margin-bottom: 8px !important;
+                margin-bottom: 5px !important;
             }
             
             .team-section.enemy-team {
-                margin-bottom: 0 !important;
+                margin-bottom: 5px !important;
                 flex-grow: 0 !important; /* Don't let it expand */
             }
             
             /* LARGER, MORE USER-FRIENDLY battle controls */
             .battle-controls {
-                padding: 15px !important;
+                padding: 20px !important;
                 position: fixed !important;
                 bottom: 0 !important;
                 left: 0 !important;
                 right: 0 !important;
                 background: rgba(255, 255, 255, 0.98) !important;
                 border-radius: 20px 20px 0 0;
-                max-height: 170px !important;
+                max-height: 200px !important;
                 overflow-y: auto !important;
                 z-index: 1000 !important;
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
@@ -1423,8 +1423,8 @@
             
             /* Larger controls header */
             .battle-controls > div:first-child {
-                margin-bottom: 12px !important;
-                font-size: 16px !important;
+                margin-bottom: 15px !important;
+                font-size: 18px !important;
                 font-weight: bold !important;
                 display: flex;
                 justify-content: space-between;
@@ -1441,24 +1441,24 @@
             
             /* "Select an attack:" text */
             .attack-buttons > div:first-child {
-                font-size: 14px !important;
-                margin-bottom: 10px !important;
+                font-size: 16px !important;
+                margin-bottom: 12px !important;
                 font-weight: 500 !important;
             }
             
             /* MUCH LARGER attack buttons */
             .attack-buttons {
                 flex-direction: row !important;
-                gap: 12px !important;
+                gap: 15px !important;
                 justify-content: center;
                 flex-wrap: wrap;
                 margin-bottom: 0;
             }
             
             .attack-btn {
-                min-width: 140px !important;
-                padding: 14px 20px !important;
-                font-size: 16px !important;
+                min-width: 160px !important;
+                padding: 16px 24px !important;
+                font-size: 18px !important;
                 font-weight: bold !important;
                 border-radius: 20px !important;
                 box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -1475,6 +1475,23 @@
                 min-height: 100vh;
                 display: flex;
                 flex-direction: column;
+            }
+            
+            /* Make turn order more compact on mobile */
+            .turn-order-bar {
+                padding: 10px !important;
+                margin-bottom: 5px !important;
+            }
+            
+            .turn-order-title {
+                font-size: 12px !important;
+                margin-bottom: 8px !important;
+            }
+            
+            .turn-indicator {
+                width: 35px !important;
+                height: 35px !important;
+                font-size: 11px !important;
             }
             
             /* Remove any flex-grow that might cause spacing issues */
