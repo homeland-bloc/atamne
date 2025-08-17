@@ -891,6 +891,27 @@
             overflow-y: auto;
         }
 
+        .random-select-btn {
+            background: linear-gradient(45deg, #9c27b0, #673ab7);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            width: 100%;
+        }
+
+        .random-select-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(156, 39, 176, 0.3);
+        }
+
         .selection-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
@@ -1745,6 +1766,7 @@
                 </div>
 
                 <div class="character-selection-panel">
+                    <button class="random-select-btn" id="randomSelectBtn">🎲 Select 3 Random Characters</button>
                     <div class="selection-grid" id="battleCharacterSelection"></div>
                 </div>
 
@@ -2033,6 +2055,7 @@
                 this.turnHistory = []; // Track completed turns
                 this.upcomingTurns = []; // Pre-calculated upcoming turns
                 this.ACTION_THRESHOLD = 1000; // Action bar threshold
+                this.isProcessingTurn = false; // Flag to prevent multiple attacks in one turn
             }
 
             setDifficulty(difficulty) {
@@ -2336,8 +2359,16 @@
             }
 
             async processTurn(attackObj, targetCharacter) {
+                // Prevent multiple attacks in one turn
+                if (this.isProcessingTurn) {
+                    return;
+                }
+                
+                this.isProcessingTurn = true;
+                
                 const attacker = this.getCurrentCharacter();
                 if (!attacker || attacker.hp <= 0) {
+                    this.isProcessingTurn = false;
                     this.nextTurn();
                     return;
                 }
@@ -2350,10 +2381,12 @@
                 
                 // Check for battle end
                 if (this.checkBattleEnd()) {
+                    this.isProcessingTurn = false;
                     return;
                 }
                 
                 this.nextTurn();
+                this.isProcessingTurn = false;
             }
 
             async processSingleAttack(attacker, attackGene, targetCharacter) {
@@ -2584,6 +2617,7 @@
             endBattle(playerWon) {
                 this.clearAllTimers(); // Add this line
                 this.battlePhase = 'ended';
+                this.isProcessingTurn = false; // Reset the flag
                 const message = playerWon ? 'Victory! You won the battle!' : 'Defeat! Better luck next time!';
                 const teamClass = playerWon ? 'player-attack' : 'enemy-attack';
                 this.addBattleLog(message, `super-effective ${teamClass}`);
@@ -2873,6 +2907,11 @@
             }
 
             selectAttackGene(attackObj) {
+                // Prevent selecting attack if already processing a turn
+                if (this.isProcessingTurn) {
+                    return;
+                }
+                
                 this.selectedAttackObj = attackObj;
                 this.showTargetSelection();
             }
@@ -2916,6 +2955,11 @@
                     button.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)';
                     
                     button.addEventListener('click', async () => {
+                        // Prevent multiple clicks during turn processing
+                        if (this.isProcessingTurn) {
+                            return;
+                        }
+                        
                         await this.showAttackAnimation(this.getCurrentCharacter(), target);
                         this.processTurn(this.selectedAttackObj, target);
                     });
@@ -3261,6 +3305,25 @@
                 this.updateBattleTeamSelection();
             }
 
+            selectRandomTeam() {
+                // Get all unlocked characters
+                const unlockedCharacters = Object.values(this.characters).filter(char => char.unlocked);
+                
+                if (unlockedCharacters.length < 3) {
+                    alert('You need at least 3 unlocked characters to use random selection!');
+                    return;
+                }
+                
+                // Clear current selection
+                this.selectedBattleTeam = [];
+                
+                // Randomly select 3 different characters
+                const shuffled = [...unlockedCharacters].sort(() => 0.5 - Math.random());
+                this.selectedBattleTeam = shuffled.slice(0, 3).map(char => char.id);
+                
+                this.updateBattleTeamSelection();
+            }
+
             startBattle() {
                 if (this.selectedBattleTeam.length !== 3) return;
                 
@@ -3511,6 +3574,7 @@
                 document.getElementById('cancelReset').addEventListener('click', () => this.cancelReset());
                 document.getElementById('startBattleBtn').addEventListener('click', () => this.startBattle());
                 document.getElementById('unlockAllBtn').addEventListener('click', () => this.unlockAllCharacters());
+                document.getElementById('randomSelectBtn').addEventListener('click', () => this.selectRandomTeam());
 
                 // Add this to setupEventListeners method
                 document.querySelectorAll('.difficulty-btn').forEach(btn => {
