@@ -1,13 +1,13 @@
 // BreedingGame Class - Main Game Coordinator and State Manager
 import { GENES } from './config.js';
-import { GameCharacter } from './GameCharacter.js';
-import { BattleSystem } from './BattleSystem.js';
-import { BattleAI } from './BattleAI.js';
-import { BattleDisplay } from './BattleDisplay.js';
-import { BattleControls } from './BattleControls.js';
-import { BreedingLogic } from './BreedingLogic.js';
-import { BreedingUI } from './BreedingUI.js';
-import { BotSolver } from './BotSolver.js';
+import { GameCharacter } from './gamecharacter.js';
+import { BattleSystem } from './battlesystem.js';
+import { BattleAI } from './battleai.js';
+import { BattleDisplay } from './battledisplay.js';
+import { BattleControls } from './battlecontrols.js';
+import { BreedingLogic } from './breedinglogic.js';
+import { BreedingUI } from './breedingui.js';
+import { BotSolver } from './botsolver.js';
 
 export class BreedingGame {
     constructor() {
