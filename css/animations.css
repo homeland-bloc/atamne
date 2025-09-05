@@ -1,0 +1,390 @@
+/* Animations and Visual Effects */
+
+/* Damage Animation */
+@keyframes damageFloat {
+    0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0;
+    }
+    15% {
+        transform: translateY(-10px) scale(1.1);
+        opacity: 1;
+    }
+    85% {
+        transform: translateY(-80px) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-120px) scale(0.9);
+        opacity: 0;
+    }
+}
+
+.damage-animation {
+    animation: damageFloat 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Battle Shake Animation */
+@keyframes battleShake {
+    0%, 100% { 
+        transform: translateX(0); 
+    }
+    10% { 
+        transform: translateX(calc(-8px * var(--shake-intensity, 1))); 
+    }
+    20% { 
+        transform: translateX(calc(8px * var(--shake-intensity, 1))); 
+    }
+    30% { 
+        transform: translateX(calc(-6px * var(--shake-intensity, 1))); 
+    }
+    40% { 
+        transform: translateX(calc(6px * var(--shake-intensity, 1))); 
+    }
+    50% { 
+        transform: translateX(calc(-4px * var(--shake-intensity, 1))); 
+    }
+    60% { 
+        transform: translateX(calc(4px * var(--shake-intensity, 1))); 
+    }
+    70% { 
+        transform: translateX(calc(-2px * var(--shake-intensity, 1))); 
+    }
+    80% { 
+        transform: translateX(calc(2px * var(--shake-intensity, 1))); 
+    }
+}
+
+.battle-shake {
+    animation: battleShake 0.5s ease-in-out;
+}
+
+/* Turn Order Slide Animation */
+@keyframes slideLeft {
+    0% { transform: translateX(50px); opacity: 0.7; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+/* Breeding Preview Popup Animation */
+@keyframes breedingPreviewPop {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* Victory Message Animation */
+@keyframes victoryPop {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+/* New Discovery Animation */
+@keyframes newDiscovery {
+    0% { transform: scale(0) rotate(0deg); }
+    50% { transform: scale(1.2) rotate(180deg); }
+    100% { transform: scale(1) rotate(360deg); }
+}
+
+.new-discovery {
+    animation: newDiscovery 0.8s ease-out;
+}
+
+/* Breeding Button Pulse */
+@keyframes breedingPulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+.breed-btn.breeding {
+    animation: breedingPulse 0.5s ease-in-out infinite alternate;
+}
+
+/* Turn Indicator Pulse */
+@keyframes pulse {
+    0%, 100% { transform: scale(1.2); }
+    50% { transform: scale(1.3); }
+}
+
+.turn-indicator.active {
+    animation: pulse 1s ease-in-out infinite;
+}
+
+/* Sunshine Effect Animation */
+@keyframes sunshineGlow {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
+}
+
+.sunshine-effect {
+    animation: sunshineGlow 1s ease-out;
+}
+
+/* Sparkle Effects */
+@keyframes sparkleFloat {
+    0% { 
+        transform: scale(0) rotate(0deg); 
+        opacity: 1; 
+    }
+    50% { 
+        transform: scale(1) rotate(180deg); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: scale(0) rotate(360deg); 
+        opacity: 0; 
+    }
+}
+
+.breeding-sparkle {
+    animation: sparkleFloat 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Particle Fall Animation */
+@keyframes particleFall {
+    0% { 
+        transform: translateY(0px) scale(1); 
+        opacity: 1; 
+    }
+    100% { 
+        transform: translateY(-100px) scale(0); 
+        opacity: 0; 
+    }
+}
+
+.particle {
+    animation: particleFall 2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+/* Hover Animations */
+.character-slot.unlocked:hover {
+    animation: characterHover 0.3s ease-out forwards;
+}
+
+@keyframes characterHover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-3px); }
+}
+
+.attack-btn:hover:not(:disabled) {
+    animation: buttonHover 0.3s ease-out forwards;
+}
+
+@keyframes buttonHover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-2px); }
+}
+
+.tab-button:hover:not(.active) {
+    animation: tabHover 0.3s ease-out forwards;
+}
+
+@keyframes tabHover {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-1px); }
+}
+
+/* Selection Animations */
+@keyframes selectScale {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+.character-slot.selected {
+    animation: selectScale 0.2s ease-out forwards;
+}
+
+@keyframes activeGlow {
+    0% { box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3); }
+    50% { box-shadow: 0 6px 25px rgba(78, 205, 196, 0.5); }
+    100% { box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3); }
+}
+
+.tab-button.active {
+    animation: activeGlow 2s ease-in-out infinite;
+}
+
+/* Loading/Thinking Animations */
+@keyframes thinking {
+    0%, 20% { opacity: 1; }
+    50% { opacity: 0.5; }
+    80%, 100% { opacity: 1; }
+}
+
+.bot-status.active {
+    animation: thinking 1.5s ease-in-out infinite;
+}
+
+/* Progress Bar Animation */
+@keyframes progressFill {
+    0% { width: 0%; }
+    100% { width: var(--target-width); }
+}
+
+.progress-fill {
+    animation: progressFill 0.5s ease-out;
+}
+
+/* Fade In/Out Effects */
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
+.fade-out {
+    animation: fadeOut 0.3s ease-out;
+}
+
+/* Slide Animations */
+@keyframes slideInFromRight {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromTop {
+    0% { transform: translateY(-100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+    0% { transform: translateY(100%); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+.slide-in-right {
+    animation: slideInFromRight 0.4s ease-out;
+}
+
+.slide-in-left {
+    animation: slideInFromLeft 0.4s ease-out;
+}
+
+.slide-in-top {
+    animation: slideInFromTop 0.4s ease-out;
+}
+
+.slide-in-bottom {
+    animation: slideInFromBottom 0.4s ease-out;
+}
+
+/* Scale Animations */
+@keyframes scaleIn {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes scaleOut {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0); opacity: 0; }
+}
+
+.scale-in {
+    animation: scaleIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.scale-out {
+    animation: scaleOut 0.3s ease-in;
+}
+
+/* Rotation Animations */
+@keyframes rotate360 {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes wiggle {
+    0%, 7% { transform: rotateZ(0); }
+    15% { transform: rotateZ(-15deg); }
+    20% { transform: rotateZ(10deg); }
+    25% { transform: rotateZ(-10deg); }
+    30% { transform: rotateZ(6deg); }
+    35% { transform: rotateZ(-4deg); }
+    40%, 100% { transform: rotateZ(0); }
+}
+
+.rotate {
+    animation: rotate360 1s linear infinite;
+}
+
+.wiggle {
+    animation: wiggle 1s ease-in-out;
+}
+
+/* Health Bar Animations */
+@keyframes healthDecrease {
+    0% { width: var(--start-width); background: #66bb6a; }
+    50% { background: #ff6b6b; }
+    100% { width: var(--end-width); background: var(--final-color); }
+}
+
+.health-decrease {
+    animation: healthDecrease 0.8s ease-out;
+}
+
+/* Stagger Animation Delays */
+.stagger-1 { animation-delay: 0.1s; }
+.stagger-2 { animation-delay: 0.2s; }
+.stagger-3 { animation-delay: 0.3s; }
+.stagger-4 { animation-delay: 0.4s; }
+.stagger-5 { animation-delay: 0.5s; }
+.stagger-6 { animation-delay: 0.6s; }
+
+/* Easing Functions */
+.ease-in-out-back {
+    animation-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.ease-in-out-circ {
+    animation-timing-function: cubic-bezier(0.785, 0.135, 0.15, 0.86);
+}
+
+.ease-in-out-expo {
+    animation-timing-function: cubic-bezier(1, 0, 0, 1);
+}
+
+/* Performance Optimization */
+.will-animate {
+    will-change: transform, opacity;
+}
+
+.hardware-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .turn-indicator.active {
+        animation: none;
+        transform: scale(1.2);
+    }
+    
+    .breed-btn.breeding {
+        animation: none;
+    }
+    
+    .bot-status.active {
+        animation: none;
+    }
+}
