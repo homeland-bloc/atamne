@@ -1,5 +1,5 @@
 // Main Entry Point - Game Initialization and Startup
-import { BreedingGame } from './BreedingGame.js';
+import { BreedingGame } from './breedinggame.js';
 
 /**
  * Main application class - handles initialization and global setup
