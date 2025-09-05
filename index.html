@@ -1767,56 +1767,6 @@
         .battle-sprite.single-gene {
             background: linear-gradient(135deg, var(--gene-color), white) !important;
         }
-
-        /* Special Abilities and Status Effects Styling */
-        .ability-icon {
-            animation: abilityPulse 2s ease-in-out infinite;
-        }
-
-        @keyframes abilityPulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        .status-effects {
-            min-height: 16px;
-        }
-
-        .status-effects span {
-            animation: statusGlow 1.5s ease-in-out infinite alternate;
-        }
-
-        @keyframes statusGlow {
-            0% { filter: brightness(1); }
-            100% { filter: brightness(1.3) drop-shadow(0 0 3px rgba(255, 255, 255, 0.5)); }
-        }
-
-        /* Invisibility effect */
-        .battle-character.invisible .battle-sprite {
-            opacity: 0.6;
-            filter: blur(1px);
-        }
-
-        /* Rage effect */
-        .battle-character.rage .battle-sprite {
-            animation: rageShake 0.5s ease-in-out infinite;
-        }
-
-        @keyframes rageShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-2px); }
-            75% { transform: translateX(2px); }
-        }
-
-        /* Curse effect */
-        .battle-character.cursed .battle-sprite {
-            filter: hue-rotate(280deg) brightness(0.8);
-        }
-
-        /* Speed debuff effect */
-        .battle-character.speed-debuff .battle-sprite {
-            filter: brightness(0.7) saturate(0.5);
-        }
     </style>
 </head>
 <body>
@@ -2045,46 +1995,6 @@
             'Purple': '🔮'
         };
 
-        // Special Abilities System
-        const SPECIAL_ABILITIES = {
-            'Red': {
-                name: 'Blood Rage',
-                description: 'Gain +32 damage and invisibility when HP drops below 75%',
-                trigger: 'passive',
-                effect: 'rage'
-            },
-            'Orange': {
-                name: 'Molten Armor',
-                description: 'All incoming damage reduced by 16 points (minimum 1)',
-                trigger: 'passive',
-                effect: 'damage_reduction'
-            },
-            'Yellow': {
-                name: 'Solar Recovery',
-                description: 'Heal 48 HP at the start of each turn',
-                trigger: 'turn_start',
-                effect: 'healing'
-            },
-            'Green': {
-                name: 'Thorn Skin',
-                description: 'Reflect 50% of attacker\'s base damage when hit',
-                trigger: 'passive',
-                effect: 'reflection'
-            },
-            'Blue': {
-                name: 'Frozen Trail',
-                description: 'Reduce target\'s speed by 24 for their next turn after attacking',
-                trigger: 'on_attack',
-                effect: 'speed_debuff'
-            },
-            'Purple': {
-                name: 'Hex Mark',
-                description: 'Attacks apply "Cursed" status - target deals 25% less damage next turn',
-                trigger: 'on_attack',
-                effect: 'curse'
-            }
-        };
-
         // Type effectiveness system: Red→Orange→Yellow→Green→Blue→Purple→Red
         const TYPE_EFFECTIVENESS = {
             'Red': { 'Orange': 1.5, 'Yellow': 1.25, 'Purple': 0.5, 'Blue': 0.75 },
@@ -2102,17 +2012,6 @@
                 this.unlocked = unlocked;
                 this.symbol = this.generateSymbol();
                 this.stats = this.generateStats();
-                
-                // Special ability assignment based on secondary gene (or primary for single-gene characters)
-                this.specialAbility = this.assignSpecialAbility();
-                
-                // Status effect tracking
-                this.statusEffects = {
-                    invisibility: { active: false, duration: 0 },
-                    speedDebuff: { active: false, duration: 0, amount: 0 },
-                    curse: { active: false, duration: 0 },
-                    rage: { active: false, bonusDamage: 0 }
-                };
             }
 
             generateSymbol() {
@@ -2240,142 +2139,9 @@
                 const baseDamage = this.stats.attack;
                 const effectiveness = this.getEffectiveness(attackGene, defendingCharacter);
                 
-                // Add rage bonus damage if active
-                let finalDamage = baseDamage * effectiveness;
-                if (this.statusEffects.rage.active) {
-                    finalDamage += this.statusEffects.rage.bonusDamage;
-                }
-                
                 // Since all stats are divisible by 4, and effectiveness is 0.5, 0.75, 1.0, 1.25, or 1.5
                 // The result will always be a whole number
-                return finalDamage;
-            }
-
-            assignSpecialAbility() {
-                // For single-gene characters, use their primary gene
-                // For double-gene characters, use the SECOND gene in their ID
-                const abilityGene = this.genes.length === 1 ? this.genes[0] : this.genes[1];
-                return SPECIAL_ABILITIES[abilityGene] || null;
-            }
-
-            getAbilityName() {
-                return this.specialAbility ? this.specialAbility.name : 'None';
-            }
-
-            getAbilityDescription() {
-                return this.specialAbility ? this.specialAbility.description : 'No special ability';
-            }
-
-            isInvisible() {
-                return this.statusEffects.invisibility.active;
-            }
-
-            isCursed() {
-                return this.statusEffects.curse.active;
-            }
-
-            getSpeedDebuff() {
-                return this.statusEffects.speedDebuff.active ? this.statusEffects.speedDebuff.amount : 0;
-            }
-
-            getEffectiveSpeed() {
-                return Math.max(1, this.stats.speed - this.getSpeedDebuff());
-            }
-
-            applyDamageReduction(damage) {
-                if (this.specialAbility && this.specialAbility.effect === 'damage_reduction') {
-                    return Math.max(1, damage - 16);
-                }
-                return damage;
-            }
-
-            triggerBloodRage() {
-                if (this.specialAbility && this.specialAbility.effect === 'rage' && 
-                    this.hp <= this.stats.maxHp * 0.75 && !this.statusEffects.rage.active) {
-                    
-                    this.statusEffects.rage.active = true;
-                    this.statusEffects.rage.bonusDamage = 32;
-                    this.statusEffects.invisibility.active = true;
-                    this.statusEffects.invisibility.duration = 2;
-                    
-                    return true; // Indicates rage was triggered
-                }
-                return false;
-            }
-
-            triggerThornSkin(attacker, damage) {
-                if (this.specialAbility && this.specialAbility.effect === 'reflection') {
-                    const reflectedDamage = Math.floor(attacker.stats.attack * 0.5);
-                    return reflectedDamage;
-                }
-                return 0;
-            }
-
-            applySpeedDebuff(target, amount) {
-                if (this.specialAbility && this.specialAbility.effect === 'speed_debuff') {
-                    target.statusEffects.speedDebuff.active = true;
-                    target.statusEffects.speedDebuff.duration = 1;
-                    target.statusEffects.speedDebuff.amount = amount;
-                    return true;
-                }
-                return false;
-            }
-
-            applyCurse(target) {
-                if (this.specialAbility && this.specialAbility.effect === 'curse') {
-                    target.statusEffects.curse.active = true;
-                    target.statusEffects.curse.duration = 1;
-                    return true;
-                }
-                return false;
-            }
-
-            healFromSolarRecovery() {
-                if (this.specialAbility && this.specialAbility.effect === 'healing') {
-                    const healAmount = 48;
-                    const oldHp = this.hp;
-                    this.hp = Math.min(this.stats.maxHp, this.hp + healAmount);
-                    return this.hp - oldHp; // Return actual amount healed
-                }
-                return 0;
-            }
-
-            updateStatusEffects() {
-                // Update invisibility duration
-                if (this.statusEffects.invisibility.active) {
-                    this.statusEffects.invisibility.duration--;
-                    if (this.statusEffects.invisibility.duration <= 0) {
-                        this.statusEffects.invisibility.active = false;
-                        this.statusEffects.invisibility.duration = 0;
-                    }
-                }
-
-                // Update speed debuff duration
-                if (this.statusEffects.speedDebuff.active) {
-                    this.statusEffects.speedDebuff.duration--;
-                    if (this.statusEffects.speedDebuff.duration <= 0) {
-                        this.statusEffects.speedDebuff.active = false;
-                        this.statusEffects.speedDebuff.duration = 0;
-                        this.statusEffects.speedDebuff.amount = 0;
-                    }
-                }
-
-                // Update curse duration
-                if (this.statusEffects.curse.active) {
-                    this.statusEffects.curse.duration--;
-                    if (this.statusEffects.curse.duration <= 0) {
-                        this.statusEffects.curse.active = false;
-                        this.statusEffects.curse.duration = 0;
-                    }
-                }
-            }
-
-            getDamageMultiplier() {
-                // Apply curse effect (25% damage reduction)
-                if (this.statusEffects.curse.active) {
-                    return 0.75;
-                }
-                return 1.0;
+                return baseDamage * effectiveness;
             }
         }
 
@@ -2446,13 +2212,6 @@
                 this.playerTeam.forEach(char => {
                     char.hp = char.stats.maxHp;
                     char.isPlayer = true;
-                    // Initialize status effects for battle
-                    char.statusEffects = {
-                        invisibility: { active: false, duration: 0 },
-                        speedDebuff: { active: false, duration: 0, amount: 0 },
-                        curse: { active: false, duration: 0 },
-                        rage: { active: false, bonusDamage: 0 }
-                    };
                 });
 
                 this.generateEnemyTeam();
@@ -2494,13 +2253,6 @@
                         
                         enemyChar.hp = enemyChar.stats.maxHp;
                         enemyChar.isPlayer = false;
-                        // Initialize status effects for battle
-                        enemyChar.statusEffects = {
-                            invisibility: { active: false, duration: 0 },
-                            speedDebuff: { active: false, duration: 0, amount: 0 },
-                            curse: { active: false, duration: 0 },
-                            rage: { active: false, bonusDamage: 0 }
-                        };
                         this.enemyTeam.push(enemyChar);
                     }
                 } else {
@@ -2510,13 +2262,6 @@
                         const enemyChar = Object.assign(Object.create(Object.getPrototypeOf(randomChar)), randomChar);
                         enemyChar.hp = enemyChar.stats.maxHp;
                         enemyChar.isPlayer = false;
-                        // Initialize status effects for battle
-                        enemyChar.statusEffects = {
-                            invisibility: { active: false, duration: 0 },
-                            speedDebuff: { active: false, duration: 0, amount: 0 },
-                            curse: { active: false, duration: 0 },
-                            rage: { active: false, bonusDamage: 0 }
-                        };
                         this.enemyTeam.push(enemyChar);
                         
                         // Remove from available to prevent duplicates
@@ -2563,11 +2308,11 @@
                 const turns = [];
                 
                 while (turns.length < numberOfTurns) {
-                    // Increment all action bars by their effective speed (considering debuffs)
+                    // Increment all action bars by their speed
                     allCharacters.forEach(char => {
                         const charId = this.getCharId(char);
                         if (simActionBars[charId] !== undefined) {
-                            simActionBars[charId] += char.getEffectiveSpeed();
+                            simActionBars[charId] += char.stats.speed;
                         }
                     });
                     
@@ -2643,18 +2388,10 @@
                     this.turnQueue = this.upcomingTurns.slice(0, 6);
                 }
                 
-                // Update status effects for all characters
-                this.updateAllStatusEffects();
-                
-                // Process turn-start abilities for the next character
-                const nextChar = this.getCurrentCharacter();
-                if (nextChar) {
-                    this.processTurnStartAbilities(nextChar);
-                }
-                
                 // Update display
                 this.updateBattleDisplay();
                 
+                const nextChar = this.getCurrentCharacter();
                 if (nextChar && !nextChar.isPlayer) {
                     this.nextTurnTimer = setTimeout(() => {
                     this.nextTurnTimer = null;
@@ -2668,14 +2405,14 @@
             }
 
             progressActionBars() {
-                // Progress all action bars based on effective speed (considering debuffs)
+                // Progress all action bars based on speed
                 const allCharacters = [...this.playerTeam, ...this.enemyTeam]
                     .filter(char => char.hp > 0);
                 
                 allCharacters.forEach(char => {
                     const charId = this.getCharId(char);
                     if (this.actionBars[charId] !== undefined) {
-                        this.actionBars[charId] += char.getEffectiveSpeed();
+                        this.actionBars[charId] += char.stats.speed;
                     }
                 });
                 
@@ -2766,26 +2503,10 @@
             }
 
             async processSingleAttack(attacker, attackGene, targetCharacter) {
-                // Check if target is invisible (untargetable)
-                if (targetCharacter.isInvisible()) {
-                    const teamClass = attacker.isPlayer ? 'player-attack' : 'enemy-attack';
-                    this.addBattleLog(`👻 ${attacker.id}'s attack missed ${targetCharacter.id} (invisible)!`, `not-very-effective ${teamClass}`);
-                    return;
-                }
-
-                // Apply curse damage reduction to attacker
-                const damageMultiplier = attacker.getDamageMultiplier();
-                
-                // Calculate base damage with rage bonus
                 const baseDamage = attacker.stats.attack;
                 const effectiveness = attacker.getEffectiveness(attackGene, targetCharacter);
-                let finalDamage = baseDamage * effectiveness * damageMultiplier;
+                const finalDamage = baseDamage * effectiveness;
                 
-                // Apply Orange's Molten Armor damage reduction
-                const originalDamage = finalDamage;
-                finalDamage = targetCharacter.applyDamageReduction(finalDamage);
-                
-                // Apply damage
                 targetCharacter.hp = Math.max(0, targetCharacter.hp - finalDamage);
                 
                 // Get attack and defense gene symbols
@@ -2812,16 +2533,6 @@
                     effectivenessText = `Normal damage`;
                 }
                 
-                // Add curse effect to log if applicable
-                if (damageMultiplier < 1.0) {
-                    effectivenessText += ` | Cursed (-25%)`;
-                }
-                
-                // Add damage reduction to log if applicable
-                if (finalDamage < originalDamage) {
-                    effectivenessText += ` | Armor (-${originalDamage - finalDamage})`;
-                }
-                
                 const detailedLog = `${attacker.id} (${attackSymbol}${attackGene}) → ${targetCharacter.id} (${defenseSymbols}${targetCharacter.genes.join('-')}) | Base: ${baseDamage} × ${effectiveness} = ${finalDamage} dmg | ${effectivenessText}`;
                 
                 // Color code based on team
@@ -2829,29 +2540,6 @@
                 this.addBattleLog(detailedLog, `${logClass} ${teamClass}`);
                 
                 this.showDamageAnimation(targetCharacter, finalDamage, effectiveness);
-                
-                // Trigger Green's Thorn Skin reflection
-                const reflectedDamage = targetCharacter.triggerThornSkin(attacker, finalDamage);
-                if (reflectedDamage > 0) {
-                    attacker.hp = Math.max(0, attacker.hp - reflectedDamage);
-                    this.addBattleLog(`🦔 ${targetCharacter.id}'s Thorn Skin reflects ${reflectedDamage} damage back to ${attacker.id}!`, `super-effective ${teamClass}`);
-                    this.showDamageAnimation(attacker, reflectedDamage, 1.0);
-                }
-                
-                // Trigger Red's Blood Rage if HP drops below 75%
-                if (targetCharacter.triggerBloodRage()) {
-                    this.addBattleLog(`😤 ${targetCharacter.id} enters Blood Rage! +32 damage and invisibility for 2 turns!`, `super-effective ${teamClass}`);
-                }
-                
-                // Apply Blue's Frozen Trail speed debuff
-                if (attacker.applySpeedDebuff(targetCharacter, 24)) {
-                    this.addBattleLog(`❄️ ${attacker.id}'s Frozen Trail reduces ${targetCharacter.id}'s speed by 24!`, `super-effective ${teamClass}`);
-                }
-                
-                // Apply Purple's Hex Mark curse
-                if (attacker.applyCurse(targetCharacter)) {
-                    this.addBattleLog(`🔮 ${attacker.id}'s Hex Mark curses ${targetCharacter.id}! -25% damage next turn!`, `super-effective ${teamClass}`);
-                }
                 
                 if (targetCharacter.hp <= 0) {
                     this.addBattleLog(`💀 ${targetCharacter.id} was defeated!`, `damage ${teamClass}`);
@@ -2862,67 +2550,25 @@
             async processSplashAttack(attacker, attackGene) {
                 // Target the ENEMY team, not own team
                 const targets = attacker.isPlayer ? 
-                    this.enemyTeam.filter(char => char.hp > 0 && !char.isInvisible()).slice(0, 3) :
-                    this.playerTeam.filter(char => char.hp > 0 && !char.isInvisible()).slice(0, 3);
+                    this.enemyTeam.filter(char => char.hp > 0).slice(0, 3) :
+                    this.playerTeam.filter(char => char.hp > 0).slice(0, 3);
                     
                 const teamClass = attacker.isPlayer ? 'player-attack' : 'enemy-attack';
                 this.addBattleLog(`💥💥 ${attacker.id} uses ${GENE_SYMBOLS[attackGene]} ${attackGene} Splash Attack!`, `super-effective ${teamClass}`);
                 
                 for (const target of targets) {
-                    // Apply curse damage reduction to attacker
-                    const damageMultiplier = attacker.getDamageMultiplier();
-                    
                     const baseDamage = attacker.stats.attack;
                     const effectiveness = attacker.getEffectiveness(attackGene, target);
-                    const singleDamage = baseDamage * effectiveness * damageMultiplier;
-                    let splashDamage = singleDamage / 2;
-                    
-                    // Apply Orange's Molten Armor damage reduction
-                    const originalDamage = splashDamage;
-                    splashDamage = target.applyDamageReduction(splashDamage);
+                    const singleDamage = baseDamage * effectiveness;
+                    const splashDamage = singleDamage / 2;
                     
                     target.hp = Math.max(0, target.hp - splashDamage);
                     
                     const defenseSymbols = target.genes.map(gene => GENE_SYMBOLS[gene]).join('');
-                    let effectivenessText = `Base: ${baseDamage} × ${effectiveness} ÷ 2 = ${splashDamage} dmg`;
-                    
-                    // Add curse effect to log if applicable
-                    if (damageMultiplier < 1.0) {
-                        effectivenessText += ` | Cursed (-25%)`;
-                    }
-                    
-                    // Add damage reduction to log if applicable
-                    if (splashDamage < originalDamage) {
-                        effectivenessText += ` | Armor (-${originalDamage - splashDamage})`;
-                    }
-                    
-                    const detailedLog = `${attacker.id} (${GENE_SYMBOLS[attackGene]}${attackGene}) SPLASH → ${target.id} (${defenseSymbols}${target.genes.join('-')}) | ${effectivenessText}`;
+                    const detailedLog = `${attacker.id} (${GENE_SYMBOLS[attackGene]}${attackGene}) SPLASH → ${target.id} (${defenseSymbols}${target.genes.join('-')}) | Base: ${baseDamage} × ${effectiveness} ÷ 2 = ${splashDamage} dmg`;
                     
                     this.addBattleLog(detailedLog, `damage ${teamClass}`);
                     this.showDamageAnimation(target, splashDamage, effectiveness);
-                    
-                    // Trigger Green's Thorn Skin reflection
-                    const reflectedDamage = target.triggerThornSkin(attacker, splashDamage);
-                    if (reflectedDamage > 0) {
-                        attacker.hp = Math.max(0, attacker.hp - reflectedDamage);
-                        this.addBattleLog(`🦔 ${target.id}'s Thorn Skin reflects ${reflectedDamage} damage back to ${attacker.id}!`, `super-effective ${teamClass}`);
-                        this.showDamageAnimation(attacker, reflectedDamage, 1.0);
-                    }
-                    
-                    // Trigger Red's Blood Rage if HP drops below 75%
-                    if (target.triggerBloodRage()) {
-                        this.addBattleLog(`😤 ${target.id} enters Blood Rage! +32 damage and invisibility for 2 turns!`, `super-effective ${teamClass}`);
-                    }
-                    
-                    // Apply Blue's Frozen Trail speed debuff
-                    if (attacker.applySpeedDebuff(target, 24)) {
-                        this.addBattleLog(`❄️ ${attacker.id}'s Frozen Trail reduces ${target.id}'s speed by 24!`, `super-effective ${teamClass}`);
-                    }
-                    
-                    // Apply Purple's Hex Mark curse
-                    if (attacker.applyCurse(target)) {
-                        this.addBattleLog(`🔮 ${attacker.id}'s Hex Mark curses ${target.id}! -25% damage next turn!`, `super-effective ${teamClass}`);
-                    }
                     
                     if (target.hp <= 0) {
                         this.addBattleLog(`💀 ${target.id} was defeated!`, `damage ${teamClass}`);
@@ -2940,14 +2586,6 @@
                 
                 if (availableTargets.length === 0) return;
                 
-                // Check if all targets are invisible
-                const visibleTargets = availableTargets.filter(target => !target.isInvisible());
-                if (visibleTargets.length === 0) {
-                    this.addBattleLog(`👻 ${attacker.id} has no visible targets to attack!`, 'enemy-attack');
-                    this.nextTurn();
-                    return;
-                }
-                
                 let selectedAttack, selectedTarget;
                 
                 // Add "AI is thinking..." message
@@ -2963,38 +2601,38 @@
                             // Random everything
                             const attackObjs = attacker.getAttackGenes();
                             selectedAttack = attackObjs[Math.floor(Math.random() * attackObjs.length)];
-                            selectedTarget = visibleTargets[Math.floor(Math.random() * visibleTargets.length)];
+                            selectedTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
                             break;
                             
                         case 'normal':
                             // 50% chance to make smart move, 50% random
                             if (Math.random() < 0.5) {
-                                const bestMove = this.calculateBestMove(attacker, visibleTargets);
+                                const bestMove = this.calculateBestMove(attacker, availableTargets);
                                 selectedAttack = bestMove.attack;
                                 selectedTarget = bestMove.target;
                             } else {
                                 const attackObjs = attacker.getAttackGenes();
                                 selectedAttack = attackObjs[Math.floor(Math.random() * attackObjs.length)];
-                                selectedTarget = visibleTargets[Math.floor(Math.random() * visibleTargets.length)];
+                                selectedTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
                             }
                             break;
                             
                         case 'hard':
                             // 80% chance to make smart move
                             if (Math.random() < 0.8) {
-                                const bestMove = this.calculateBestMove(attacker, visibleTargets);
+                                const bestMove = this.calculateBestMove(attacker, availableTargets);
                                 selectedAttack = bestMove.attack;
                                 selectedTarget = bestMove.target;
                             } else {
                                 const attackObjs = attacker.getAttackGenes();
                                 selectedAttack = attackObjs[Math.floor(Math.random() * attackObjs.length)];
-                                selectedTarget = visibleTargets[Math.floor(Math.random() * visibleTargets.length)];
+                                selectedTarget = availableTargets[Math.floor(Math.random() * availableTargets.length)];
                             }
                             break;
                             
                         case 'extreme':
                             // Always make the optimal move
-                            const bestMove = this.calculateBestMove(attacker, visibleTargets);
+                            const bestMove = this.calculateBestMove(attacker, availableTargets);
                             selectedAttack = bestMove.attack;
                             selectedTarget = bestMove.target;
                             break;
@@ -3005,14 +2643,6 @@
             }
 
             calculateBestMove(attacker, availableTargets) {
-                // Filter out invisible targets
-                const visibleTargets = availableTargets.filter(target => !target.isInvisible());
-                
-                if (visibleTargets.length === 0) {
-                    // If no visible targets, return a default move (will be handled by processAITurn)
-                    return null;
-                }
-                
                 const attackObjs = attacker.getAttackGenes();
                 let bestMove = null;
                 let bestScore = -Infinity;
@@ -3023,7 +2653,7 @@
                         let totalDamage = 0;
                         let willKillCount = 0;
                         
-                        for (const target of visibleTargets) {
+                        for (const target of availableTargets) {
                             const effectiveness = attacker.getEffectiveness(attackObj.gene, target);
                             const damage = (attacker.stats.attack * effectiveness) / 2; // Splash is half damage
                             totalDamage += damage;
@@ -3038,11 +2668,11 @@
                         
                         if (score > bestScore) {
                             bestScore = score;
-                            bestMove = { attack: attackObj, target: visibleTargets[0] }; // Target doesn't matter for splash
+                            bestMove = { attack: attackObj, target: availableTargets[0] }; // Target doesn't matter for splash
                         }
                     } else {
                         // Calculate best target for single attacks
-                        for (const target of visibleTargets) {
+                        for (const target of availableTargets) {
                             const effectiveness = attackObj.gene === 'Neutral' ? 1 : attacker.getEffectiveness(attackObj.gene, target);
                             const damage = attacker.stats.attack * effectiveness;
                             
@@ -3082,7 +2712,7 @@
                 
                 return bestMove || { 
                     attack: attackObjs[0], 
-                    target: visibleTargets[0] 
+                    target: availableTargets[0] 
                 };
             }
 
@@ -3278,6 +2908,8 @@
                 div.dataset.battleChar = character.id;
                 div.dataset.team = character.isPlayer ? 'player' : 'enemy'; // Add team identifier
                 
+                // Rest of the method remains the same...
+                
                 if (character.hp <= 0) {
                     div.classList.add('defeated');
                 }
@@ -3287,108 +2919,17 @@
                     div.classList.add('active');
                 }
                 
-                // Add status effect CSS classes
-                if (character.isInvisible()) {
-                    div.classList.add('invisible');
-                }
-                if (character.statusEffects.rage.active) {
-                    div.classList.add('rage');
-                }
-                if (character.isCursed()) {
-                    div.classList.add('cursed');
-                }
-                if (character.statusEffects.speedDebuff.active) {
-                    div.classList.add('speed-debuff');
-                }
-                
                 const sprite = document.createElement('div');
                 sprite.className = 'battle-sprite';
                 this.game.updateCharacterSprite(sprite, character);
                 
-                // Add ability icon if character has a special ability
-                if (character.specialAbility) {
-                    const abilityIcon = document.createElement('div');
-                    abilityIcon.className = 'ability-icon';
-                    abilityIcon.style.cssText = `
-                        position: absolute;
-                        top: -5px;
-                        right: -5px;
-                        width: 20px;
-                        height: 20px;
-                        background: rgba(255, 255, 255, 0.9);
-                        border-radius: 50%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        font-size: 12px;
-                        border: 2px solid #4ecdc4;
-                        z-index: 10;
-                    `;
-                    
-                    // Set ability icon based on gene type
-                    const abilityGene = character.genes.length === 1 ? character.genes[0] : character.genes[1];
-                    abilityIcon.textContent = GENE_SYMBOLS[abilityGene];
-                    abilityIcon.title = character.getAbilityName();
-                    
-                    sprite.appendChild(abilityIcon);
-                }
-                
                 const stats = document.createElement('div');
-                stats.className = 'character-stats';
-                
-                // Show effective speed if different from base speed
-                const effectiveSpeed = character.getEffectiveSpeed();
-                const speedText = effectiveSpeed !== character.stats.speed ? 
-                    `⚡ ${effectiveSpeed}(${character.stats.speed})` : 
-                    `⚡ ${character.stats.speed}`;
-                
-                stats.innerHTML = `
-                    <div>${character.id}</div>
-                    <div>❤️ <strong>${character.hp}</strong>/${character.stats.maxHp}</div>
-                    <div>⚔️ ${character.stats.attack} | ${speedText}</div>
-                `;
-                
-                // Add status effect indicators
-                const statusEffects = document.createElement('div');
-                statusEffects.className = 'status-effects';
-                statusEffects.style.cssText = `
-                    display: flex;
-                    gap: 2px;
-                    justify-content: center;
-                    margin-top: 4px;
-                `;
-                
-                if (character.isInvisible()) {
-                    const invisIcon = document.createElement('span');
-                    invisIcon.textContent = '👻';
-                    invisIcon.title = 'Invisible (untargetable)';
-                    invisIcon.style.fontSize = '12px';
-                    statusEffects.appendChild(invisIcon);
-                }
-                
-                if (character.isCursed()) {
-                    const curseIcon = document.createElement('span');
-                    curseIcon.textContent = '🔮';
-                    curseIcon.title = 'Cursed (-25% damage)';
-                    curseIcon.style.fontSize = '12px';
-                    statusEffects.appendChild(curseIcon);
-                }
-                
-                if (character.statusEffects.rage.active) {
-                    const rageIcon = document.createElement('span');
-                    rageIcon.textContent = '😤';
-                    rageIcon.title = 'Blood Rage (+32 damage)';
-                    rageIcon.style.fontSize = '12px';
-                    statusEffects.appendChild(rageIcon);
-                }
-                
-                if (character.statusEffects.speedDebuff.active) {
-                    const debuffIcon = document.createElement('span');
-                    debuffIcon.textContent = '❄️';
-                    debuffIcon.title = `Speed reduced by ${character.statusEffects.speedDebuff.amount}`;
-                    debuffIcon.style.fontSize = '12px';
-                    statusEffects.appendChild(debuffIcon);
-                }
+                    stats.className = 'character-stats';
+                    stats.innerHTML = `
+                        <div>${character.id}</div>
+                        <div>❤️ <strong>${character.hp}</strong>/${character.stats.maxHp}</div>
+                        <div>⚔️ ${character.stats.attack} | ⚡ ${character.stats.speed}</div>
+                    `;
                 
                 const healthBar = document.createElement('div');
                 healthBar.className = 'health-bar';
@@ -3400,7 +2941,6 @@
                 
                 div.appendChild(sprite);
                 div.appendChild(stats);
-                div.appendChild(statusEffects);
                 div.appendChild(healthBar);
                 
                 return div;
@@ -3519,7 +3059,7 @@
                     return;
                 }
                 
-                const availableTargets = this.enemyTeam.filter(char => char.hp > 0 && !char.isInvisible());
+                const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
                 
                 attackButtonsElement.innerHTML = '<div style="margin-bottom: 15px; color: #666; font-weight: bold; text-align: center; padding: 0 10px;">Select a target:</div>';
                 
@@ -3594,51 +3134,6 @@
                 // For now, attack a random target (could be enhanced with target selection)
                 const target = availableTargets[Math.floor(Math.random() * availableTargets.length)];
                 this.processTurn(attackGene, target);
-            }
-
-            updateAllStatusEffects() {
-                const allCharacters = [...this.playerTeam, ...this.enemyTeam];
-                allCharacters.forEach(char => {
-                    char.updateStatusEffects();
-                });
-            }
-
-            processTurnStartAbilities(character) {
-                // Process Yellow's Solar Recovery
-                const healAmount = character.healFromSolarRecovery();
-                if (healAmount > 0) {
-                    const teamClass = character.isPlayer ? 'player-attack' : 'enemy-attack';
-                    this.addBattleLog(`☀️ ${character.id}'s Solar Recovery heals ${healAmount} HP!`, `super-effective ${teamClass}`);
-                    
-                    // Show healing animation
-                    this.showHealingAnimation(character, healAmount);
-                }
-            }
-
-            showHealingAnimation(targetCharacter, healAmount) {
-                const teamPrefix = targetCharacter.isPlayer ? 'player' : 'enemy';
-                const targetElement = document.querySelector(`[data-battle-char="${targetCharacter.id}"][data-team="${teamPrefix}"]`);
-                if (!targetElement) return;
-                
-                // Create healing number element
-                const healNum = document.createElement('div');
-                healNum.className = 'damage-number damage-animation';
-                healNum.style.color = '#66bb6a';
-                healNum.textContent = `+${healAmount}`;
-                
-                const rect = targetElement.getBoundingClientRect();
-                healNum.style.position = 'fixed';
-                healNum.style.left = (rect.left + rect.width / 2) + 'px';
-                healNum.style.top = rect.top + 'px';
-                healNum.style.zIndex = '1000';
-                
-                document.body.appendChild(healNum);
-                
-                setTimeout(() => {
-                    if (healNum.parentNode) {
-                        healNum.remove();
-                    }
-                }, 2500);
             }
         }
 
@@ -4222,10 +3717,10 @@
                 const victoryMessage = document.getElementById('victoryMessage');
                 victoryMessage.classList.add('show');
                 
-                // Auto-hide after 2 seconds
+                // Auto-hide after 4 seconds
                 setTimeout(() => {
                     victoryMessage.classList.remove('show');
-                }, 2000);
+                }, 4000);
             }
 
             setupEventListeners() {
