@@ -140,7 +140,8 @@ export class BattleDisplay {
         
         // Create sprite element
         const sprite = document.createElement('div');
-        sprite.className = 'battle-sprite';
+        // FIX: Use the same class as breeding center for gradient backgrounds
+        sprite.className = 'character-sprite'; // was 'battle-sprite'
         this.game.breedingUI.updateCharacterSprite(sprite, character);
         
         // Create stats display
