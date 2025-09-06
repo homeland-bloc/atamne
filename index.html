@@ -1158,7 +1158,6 @@
     <div class="game-container">
         <div class="game-header">
             <h1 class="game-title">Gene Breeding & Battle Simulator</h1>
-            
             <div class="tab-navigation">
                 <button class="tab-button active" data-tab="breeding">🧬 Breeding Lab</button>
                 <button class="tab-button" data-tab="battle">⚔️ Battle Arena</button>
@@ -1177,7 +1176,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="gene-labels">
                 <div class="gene-label" style="background: #ef5350;">Red</div>
                 <div class="gene-label" style="background: #ff8a65;">Orange</div>
@@ -1187,9 +1185,7 @@
                 <div class="gene-label" style="background: #ab47bc;">Purple</div>
                 <div class="gene-label" style="background: #666;">Singles</div>
             </div>
-
             <div class="breeding-table" id="breedingTable"></div>
-
             <div class="bot-control">
                 <div class="control-row">
                     <div class="bot-switch">
@@ -1219,7 +1215,6 @@
                 </div>
                 <div class="bot-status" id="botStatus">Bot is off - You're in control</div>
             </div>
-
             <div class="selection-display">
                 <div class="selected-character">
                     <div>Parent 1</div>
@@ -1235,11 +1230,9 @@
                     </div>
                 </div>
             </div>
-
             <div class="breeding-controls">
                 <button class="breed-btn" id="breedBtn" disabled>Select Two Creatures to Breed</button>
             </div>
-
             <div class="reset-section">
                 <button class="reset-button" id="resetButton">🔄 Reset Game</button>
                 <button class="reset-button" id="unlockAllBtn" style="background: linear-gradient(45deg, #4ecdc4, #44a08d); margin-right: 15px;">🔓 Unlock All Characters</button>
@@ -1253,56 +1246,48 @@
                     <h3 style="color: #666; margin-bottom: 15px;">Choose Your Battle Team</h3>
                     <p>Select 3 creatures from your unlocked collection to form your battle team!</p>
                 </div>
-
                 <div class="character-selection-panel">
                     <button class="random-select-btn" id="randomSelectBtn">🎲 Select 3 Random Characters</button>
                     <div class="selection-grid" id="battleCharacterSelection"></div>
                 </div>
-
                 <div class="selected-team-display">
                     <div class="selected-team-title">Your Team (Select 3)</div>
                     <div class="selected-team-grid" id="selectedTeamDisplay"></div>
                 </div>
-
                 <div class="difficulty-selection" style="margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.8); border-radius: 15px; border: 2px solid #e0e0e0;">
-                <div style="font-weight: bold; color: #666; margin-bottom: 15px; text-align: center;">Enemy AI Difficulty</div>
-                <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
-                    <button class="difficulty-btn active" data-difficulty="easy">
-                        🎆 Easy<small>Random moves</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="normal">
-                        🧨 Normal<small>Semi-smart</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="hard">
-                        🚒 Hard<small>Strategic</small>
-                    </button>
-                    <button class="difficulty-btn" data-difficulty="extreme">
-                        💀 Extreme<small>Perfect play</small>
-                    </button>
+                    <div style="font-weight: bold; color: #666; margin-bottom: 15px; text-align: center;">Enemy AI Difficulty</div>
+                    <div style="display: flex; justify-content: center; gap: 15px; flex-wrap: wrap;">
+                        <button class="difficulty-btn active" data-difficulty="easy">
+                            🎆 Easy<small>Random moves</small>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="normal">
+                            🧨 Normal<small>Semi-smart</small>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            🚒 Hard<small>Strategic</small>
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="extreme">
+                            💀 Extreme<small>Perfect play</small>
+                        </button>
+                    </div>
                 </div>
-            </div>
-
                 <button class="start-battle-btn" id="startBattleBtn" disabled>Select 3 Creatures to Start Battle</button>
             </div>
-
             <div id="battle-arena" class="battle-arena" style="display: none;">
                 <div class="turn-order-bar">
                     <div class="turn-order-title">Turn Order</div>
                     <div class="turn-order-list" id="turnOrderList"></div>
                 </div>
-
                 <div class="battle-field">
                     <div class="team-section player-team">
                         <div class="team-title player">Your Team</div>
                         <div class="battle-team-display" id="playerTeamDisplay"></div>
                     </div>
-
                     <div class="team-section enemy-team">
                         <div class="team-title enemy">Enemy Team</div>
                         <div class="battle-team-display" id="enemyTeamDisplay"></div>
                     </div>
                 </div>
-
                 <div class="battle-controls" id="battleControls">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div style="font-weight: bold; color: #666;">
@@ -1338,18 +1323,15 @@
             </div>
         </div>
     </div>
-
     <div class="breeding-preview" id="breedingPreview">
         <h3 style="text-align: center; margin-bottom: 20px; color: #666;">Breeding...</h3>
         <div class="preview-character" id="previewCharacter">?</div>
     </div>
-
     <div class="victory-message" id="victoryMessage">
         <h2 style="color: #4ecdc4; margin-bottom: 20px;">🎉 Congratulations! 🎉</h2>
         <p style="font-size: 18px; color: #666;">You've discovered all 42 gene combinations!</p>
         <p style="margin-top: 10px; color: #999;">Master breeder achievement unlocked!</p>
     </div>
-
     <script>
         const GENES = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
         const GENE_COLORS = {
@@ -1806,7 +1788,7 @@
                 
                 allCharacters.forEach(char => {
                     const charId = this.getCharId(char);
-                    if (this.actionBars[charId] !== undefined) {
+                    if this.actionBars[charId] !== undefined) {
                         this.actionBars[charId] += char.stats.speed;
                     }
                 });
@@ -2900,15 +2882,7 @@
             startBattle() {
                 if (this.selectedBattleTeam.length !== 3) return;
                 
-                // 5. Hide team-setup, show battle-arena (mobile and desktop)
-                document.getElementById('team-setup').style.display = 'none';
-                document.getElementById('battle-arena').style.display = 'block';
-                // Hide mobile log modal and log button initially
-                const modal = document.getElementById('mobileBattleLogModal');
-                if (modal) modal.classList.remove('show');
-                const mobileLogBtn = document.getElementById('mobileBattleLogBtn');
-                if (mobileLogBtn) mobileLogBtn.style.display = (window.innerWidth <= 768) ? 'block' : 'none';
-                // ...existing code...
+                // Difficulty is already set via the buttons, so just start the battle
                 const playerTeam = this.selectedBattleTeam.map(id => this.characters[id]);
                 this.battleSystem.setupBattle(playerTeam);
             }
@@ -3292,6 +3266,32 @@
                 if (lockedCharacters.length === 0) return null;
                 
                 let bestPair = null;
+                let maxPotentialUnlocks = 0;
+                
+                for (let i = 0; i < unlockedCharacters.length; i++) {
+                    for (let j = i; j < unlockedCharacters.length; j++) {
+                        const char1 = this.characters[unlockedCharacters[i]];
+                        const char2 = this.characters[unlockedCharacters[j]];
+                        
+                        const offspring = this.getPossibleOffspring(char1, char2);
+                        const potentialUnlocks = offspring.filter(id => !this.characters[id].unlocked).length;
+                        
+                        if (potentialUnlocks > maxPotentialUnlocks) {
+                            maxPotentialUnlocks = potentialUnlocks;
+                            bestPair = [unlockedCharacters[i], unlockedCharacters[j]];
+                        }
+                    }
+                }
+                
+                return bestPair;
+            }
+        }
+
+        // Start the game
+        new BreedingGame();
+    </script>
+</body>
+</html>
                 let maxPotentialUnlocks = 0;
                 
                 for (let i = 0; i < unlockedCharacters.length; i++) {
