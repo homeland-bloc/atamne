@@ -983,8 +983,8 @@
         }
 
         .battle-sprite {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -999,8 +999,8 @@
 
         @media (min-width: 768px) {
             .battle-sprite {
-                width: 100px;
-                height: 100px;
+                width: 120px;
+                height: 120px;
                 font-size: 36px;
             }
         }
@@ -1018,7 +1018,7 @@
         }
 
         .health-bar {
-            width: 80px;
+            width: 100px;
             height: 8px;
             background: #e0e0e0;
             border-radius: 3px;
@@ -1028,7 +1028,7 @@
 
         @media (min-width: 768px) {
             .health-bar {
-                width: 100px;
+                width: 120px;
                 height: 10px;
             }
         }
@@ -1788,7 +1788,7 @@
                 
                 allCharacters.forEach(char => {
                     const charId = this.getCharId(char);
-                    if this.actionBars[charId] !== undefined) {
+                    if (this.actionBars[charId] !== undefined) {
                         this.actionBars[charId] += char.stats.speed;
                     }
                 });
@@ -2137,6 +2137,7 @@
                 if (logElement) {
                     logElement.innerHTML = '';
                 }
+                this.updateMobileBattleLog();
                 
                 this.game.battleSystem = new BattleSystem(this.game);
                 this.game.selectedBattleTeam = [];
@@ -2241,6 +2242,18 @@
                         .map(log => `<div class="log-entry ${log.className}">${log.message}</div>`)
                         .join('');
                     logElement.scrollTop = logElement.scrollHeight;
+                }
+                
+                this.updateMobileBattleLog();
+            }
+
+            updateMobileBattleLog() {
+                const mobileLogElement = document.getElementById('mobileBattleLogEntries');
+                if (mobileLogElement) {
+                    mobileLogElement.innerHTML = this.battleLog
+                        .map(log => `<div class="log-entry ${log.className}">${log.message}</div>`)
+                        .join('');
+                    mobileLogElement.scrollTop = mobileLogElement.scrollHeight;
                 }
             }
 
