@@ -149,8 +149,8 @@
 }
 
 .battle-sprite {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -180,8 +180,8 @@
 
 /* Add this block for correct double-gene gradients and shape */
 .character-sprite {
-    width: 60px;
-    height: 60px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -199,16 +199,15 @@
 
 /* For double gene, same gene (e.g. Red-Red) */
 .character-sprite.double-gene.same-gene {
-    background: var(--same-gene-gradient, linear-gradient(45deg, #fff, #eee, #fff)) !important;
+    /* Use a solid color or a subtle gradient between two similar shades */
+    background: var(--primary-color, #fff);
 }
 
 /* For double gene, different genes (e.g. Red-Blue) */
-.character-sprite.double-gene.different-genes {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), white) !important;
-}
-
+.character-sprite.double-gene.different-genes,
 .character-sprite.double-gene {
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), white) !important;
+    /* Smooth gradient between two gene colors, no white */
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
 }
 
 /* Character Stats */

@@ -302,6 +302,11 @@
         background: linear-gradient(135deg, var(--gene-color), white) !important;
     }
     
+    /* Fix double-gene gradients: no white, just blend two colors */
+    .character-sprite.double-gene.different-genes {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    }
+    
     .character-sprite.double-gene {
         font-size: 10px !important;
         gap: 1px !important;
@@ -309,10 +314,6 @@
     
     .character-sprite.double-gene.same-gene {
         background: var(--same-gene-gradient, linear-gradient(45deg, #fff, #eee, #fff)) !important;
-    }
-    
-    .character-sprite.double-gene.different-genes {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), white) !important;
     }
     
     /* Mobile gene labels */

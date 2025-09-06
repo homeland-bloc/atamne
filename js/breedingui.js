@@ -131,8 +131,11 @@ export class BreedingUI {
      */
     applyDifferentGenesStyle(sprite, genes) {
         sprite.classList.add('different-genes');
+        // Only set the two colors, no white
         sprite.style.setProperty('--primary-color', GENE_COLORS[genes[0]]);
         sprite.style.setProperty('--secondary-color', GENE_COLORS[genes[1]]);
+        // Remove any old white gradient property if present
+        sprite.style.removeProperty('--same-gene-gradient');
     }
 
     /**
@@ -297,6 +300,8 @@ export class BreedingUI {
             previewChar.classList.add('different-genes');
             previewChar.style.setProperty('--primary-color', GENE_COLORS[character.genes[0]]);
             previewChar.style.setProperty('--secondary-color', GENE_COLORS[character.genes[1]]);
+            // Remove any old white gradient property if present
+            previewChar.style.removeProperty('--same-gene-gradient');
         }
         
         // Add gene emojis
