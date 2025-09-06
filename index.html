@@ -802,6 +802,7 @@
             justify-content: center;
             gap: 10px;
             flex-wrap: wrap;
+            transition: all 0.3s ease;
         }
 
         .turn-indicator {
@@ -824,14 +825,12 @@
             color: white;
             transform: scale(1.2);
             box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+            animation: pulse 1s ease-in-out infinite;
         }
 
-        .turn-indicator.player {
-            border-color: #42a5f5;
-        }
-
-        .turn-indicator.enemy {
-            border-color: #ff6b6b;
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.2); }
+            50% { transform: scale(1.3); }
         }
 
         .battle-field {
@@ -984,13 +983,13 @@
         }
 
         .battle-sprite {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 28px;
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
@@ -1000,21 +999,27 @@
 
         @media (min-width: 768px) {
             .battle-sprite {
-                width: 80px;
-                height: 80px;
-                font-size: 28px;
+                width: 100px;
+                height: 100px;
+                font-size: 36px;
             }
         }
 
         .character-stats {
             text-align: center;
-            font-size: 12px;
+            font-size: 14px;
             color: #666;
         }
 
+        @media (min-width: 768px) {
+            .character-stats {
+                font-size: 16px;
+            }
+        }
+
         .health-bar {
-            width: 60px;
-            height: 6px;
+            width: 80px;
+            height: 8px;
             background: #e0e0e0;
             border-radius: 3px;
             overflow: hidden;
@@ -1023,749 +1028,129 @@
 
         @media (min-width: 768px) {
             .health-bar {
-                width: 80px;
-                height: 8px;
+                width: 100px;
+                height: 10px;
             }
         }
 
-        .health-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #ff6b6b, #ffeb3b, #66bb6a);
-            transition: width 0.5s ease;
-            border-radius: 3px;
-        }
-
-        .battle-controls {
-            position: sticky;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 20px;
-            border: 2px solid #e0e0e0;
-            text-align: center;
-        }
-
-        .attack-buttons {
+        /* 2. Reduce gap between enemy team and controls */
+        .battle-arena {
             display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
+            flex-direction: column;
+            gap: 20px;
+            min-height: 600px;
+        }
+        @media (max-width: 768px) {
+            .battle-arena {
+                gap: 10px !important;
+                padding-bottom: 100px !important;
+            }
+            .battle-controls {
+                bottom: 10px !important;
+                margin-bottom: 10px !important;
+            }
         }
 
+        /* 3. Consistent attack button sizing */
         .attack-btn {
-            background: linear-gradient(45deg, var(--attack-color, #4ecdc4), var(--attack-color-light, #44a08d));
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            min-width: 120px;
+            max-width: 140px;
+            flex: 1 1 120px;
             font-size: 14px;
-            min-width: 100px;
-            position: relative;
+            padding: 12px 16px;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            font-weight: bold;
+            white-space: nowrap;
             overflow: hidden;
+            text-overflow: ellipsis;
         }
-
-        @media (min-width: 768px) {
+        @media (max-width: 768px) {
             .attack-btn {
-                padding: 15px 30px;
-                font-size: 16px;
-                min-width: 120px;
+                min-width: 100px !important;
+                max-width: 120px !important;
+                flex: 1 1 100px !important;
+                font-size: 12px !important;
+                padding: 10px 12px !important;
             }
         }
 
-        .attack-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-        }
-
-        .attack-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .attack-btn .effectiveness {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: rgba(255, 255, 255, 0.9);
-            color: #333;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            font-weight: bold;
-        }
-
-        .attack-btn .effectiveness.super-effective {
-            background: #66bb6a;
-            color: white;
-        }
-
-        .attack-btn .effectiveness.not-very-effective {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        .battle-log {
-            background: rgba(240, 240, 240, 0.8);
-            border-radius: 10px;
-            padding: 15px;
-            max-height: 150px;
-            overflow-y: auto;
-            font-size: 14px;
-            color: #666;
-            border: 1px solid #ddd;
-            margin-top: 15px;
-        }
-
-        .log-entry {
-            margin-bottom: 8px;
-            padding: 4px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .log-entry:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-        }
-
-        .log-entry.damage {
-            color: #ff6b6b;
-        }
-
-        .log-entry.super-effective {
-            color: #66bb6a;
-            font-weight: bold;
-        }
-
-        .log-entry.not-very-effective {
-            color: #ff8a65;
-        }
-
-        .damage-number {
-            position: absolute;
-            font-size: 28px;
-            font-weight: 900;
-            color: #ff6b6b;
-            z-index: 100;
-            pointer-events: none;
-            text-shadow: 
-                2px 2px 0px #000,
-                -2px -2px 0px #000,
-                2px -2px 0px #000,
-                -2px 2px 0px #000,
-                0px 2px 4px rgba(0, 0, 0, 0.8);
-            font-family: 'Arial Black', Arial, sans-serif;
-            letter-spacing: 1px;
-        }
-
-        .damage-number.super-effective {
-            color: #66bb6a;
-            font-size: 36px;
-            text-shadow: 
-                2px 2px 0px #2e7d32,
-                -2px -2px 0px #2e7d32,
-                2px -2px 0px #2e7d32,
-                -2px 2px 0px #2e7d32,
-                0px 3px 6px rgba(46, 125, 50, 0.8);
-        }
-
-        .damage-number.not-very-effective {
-            color: #ff8a65;
-            font-size: 20px;
-            text-shadow: 
-                1px 1px 0px #e65100,
-                -1px -1px 0px #e65100,
-                1px -1px 0px #e65100,
-                -1px 1px 0px #e65100,
-                0px 2px 4px rgba(230, 81, 0, 0.6);
-        }
-
-        @keyframes damageFloat {
-            0% {
-                transform: translateY(0) scale(0.8);
-                opacity: 0;
-            }
-            15% {
-                transform: translateY(-10px) scale(1.1);
-                opacity: 1;
-            }
-            85% {
-                transform: translateY(-80px) scale(1);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(-120px) scale(0.9);
-                opacity: 0;
-            }
-        }
-
-        .damage-animation {
-            animation: damageFloat 2.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-        }
-
-        @keyframes battleShake {
-            0%, 100% { 
-                transform: translateX(0); 
-            }
-            10% { 
-                transform: translateX(calc(-8px * var(--shake-intensity, 1))); 
-            }
-            20% { 
-                transform: translateX(calc(8px * var(--shake-intensity, 1))); 
-            }
-            30% { 
-                transform: translateX(calc(-6px * var(--shake-intensity, 1))); 
-            }
-            40% { 
-                transform: translateX(calc(6px * var(--shake-intensity, 1))); 
-            }
-            50% { 
-                transform: translateX(calc(-4px * var(--shake-intensity, 1))); 
-            }
-            60% { 
-                transform: translateX(calc(4px * var(--shake-intensity, 1))); 
-            }
-            70% { 
-                transform: translateX(calc(-2px * var(--shake-intensity, 1))); 
-            }
-            80% { 
-                transform: translateX(calc(2px * var(--shake-intensity, 1))); 
-            }
-        }
-
-        .battle-shake {
-            animation: battleShake 0.5s ease-in-out;
-        }
-
-        .team-setup {
-            text-align: center;
-            padding: 20px;
-        }
-
-        .setup-instructions {
-            margin-bottom: 20px;
-            font-size: 16px;
-            color: #666;
-        }
-
-        .start-battle-btn {
+        /* 4. Mobile floating battle log button and overlay */
+        .mobile-battle-log-btn {
+            display: none;
+            position: fixed;
+            bottom: 18px;
+            right: 18px;
+            z-index: 2001;
             background: linear-gradient(45deg, #4ecdc4, #44a08d);
             color: white;
             border: none;
-            padding: 15px 40px;
+            border-radius: 50px;
+            padding: 12px 28px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 50px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
             cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+            transition: all 0.3s;
         }
-
-        .start-battle-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        .start-battle-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .selected-team-display {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.8);
-            border-radius: 15px;
-            border: 2px solid #e0e0e0;
-        }
-
-        .selected-team-title {
-            font-weight: bold;
-            color: #666;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .selected-team-grid {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
         @media (max-width: 768px) {
-            /* Add safe area for device navigation */
-            body {
-                padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+            .mobile-battle-log-btn {
+                display: block;
             }
-            
-            /* Slightly smaller header to save some space */
-            .game-title {
-                font-size: 1.4em !important;
-                margin-bottom: 10px !important;
-            }
-            
-            .tab-navigation {
-                margin-bottom: 15px !important;
-            }
-            
-            /* Compact turn order */
-            .turn-order-bar {
-                padding: 8px !important;
-                margin-bottom: 8px;
-            }
-            
-            .turn-order-title {
-                font-size: 12px !important;
-                margin-bottom: 5px !important;
-            }
-            
-            .turn-order-list {
-                gap: 4px !important;
-            }
-            
-            .turn-indicator {
-                width: 32px !important;
-                height: 32px !important;
-                font-size: 10px !important;
-            }
-            
-            /* Single column battle field */
-            .battle-field {
-                grid-template-columns: 1fr !important;
-                gap: 10px !important;
-            }
-            
-            /* Remove excessive padding/margins from team sections */
-            .team-section {
-                padding: 12px !important;
-                min-height: auto !important;
-                margin-bottom: 0 !important;
-            }
-            
-            .team-title {
-                font-size: 16px !important;
-                margin-bottom: 10px !important;
-            }
-            
-            /* Larger, more readable characters */
-            .battle-character {
-                padding: 8px !important;
-                gap: 5px !important;
-                min-width: 110px;
-                max-width: 120px;
-            }
-            
-            .battle-sprite {
-                width: 50px !important;
-                height: 50px !important;
-                font-size: 18px !important;
-            }
-            
-            .character-stats {
-                font-size: 12px !important;
-                line-height: 1.2 !important;
-            }
-            
-            .character-stats div {
-                margin-bottom: 2px !important;
-            }
-            
-            .health-bar {
-                width: 50px !important;
-                height: 5px !important;
-                margin-top: 4px !important;
-            }
-            
-            .battle-team-display {
-                gap: 10px !important;
-                justify-content: space-around;
-                flex-wrap: nowrap;
-                margin: 0 !important;
-                padding: 0 !important;
-            }
-            
-            /* REMOVE WASTED SPACE - tight battle arena */
-            .battle-arena {
-                padding-bottom: 140px !important; /* Increased space for controls */
-                gap: 5px !important;
-                padding-top: 0 !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: flex-start !important;
-                min-height: calc(100vh - 200px) !important;
-            }
-            
-            /* Remove extra space around team sections */
-            .team-section.player-team {
-                margin-bottom: 5px !important;
-            }
-            
-            .team-section.enemy-team {
-                margin-bottom: 5px !important;
-                flex-grow: 0 !important; /* Don't let it expand */
-            }
-            
-            /* IMPROVED battle controls positioning and sizing */
-            .battle-controls {
-                padding: 15px !important;
-                position: fixed !important;
-                bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
-                left: 10px !important;
-                right: 10px !important;
-                background: rgba(255, 255, 255, 0.98) !important;
-                border-radius: 20px !important;
-                max-height: 200px !important; /* Increased height */
-                overflow-y: auto !important;
-                z-index: 1000 !important;
-                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-                margin-bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
-            }
-            
-            /* Larger controls header */
-            .battle-controls > div:first-child {
-                margin-bottom: 12px !important;
-                font-size: 16px !important;
-                font-weight: bold !important;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-            
-            /* Larger quit button */
-            #quitBattleBtn {
-                padding: 8px 12px !important;
-                font-size: 12px !important;
-                min-width: auto !important;
-                border-radius: 12px !important;
-            }
-            
-            /* "Select an attack:" text */
-            .attack-buttons > div:first-child {
-                font-size: 15px !important;
-                margin-bottom: 10px !important;
-                font-weight: 500 !important;
-            }
-            
-            /* IMPROVED attack buttons layout */
-            .attack-buttons {
-                flex-direction: row !important;
-                gap: 8px !important; /* Reduced gap for better fit */
-                justify-content: center;
-                flex-wrap: wrap;
-                margin-bottom: 0;
-            }
-            
-            .attack-btn {
-                min-width: 130px !important; /* Smaller for better fit */
-                max-width: 150px !important; /* Prevent buttons from getting too wide */
-                padding: 12px 16px !important; /* Smaller padding */
-                font-size: 14px !important; /* Smaller font */
-                font-weight: bold !important;
-                border-radius: 16px !important;
-                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-                flex: 1 1 auto !important; /* Allow flexible sizing */
-            }
-            
-            /* Hide battle log on mobile */
             .battle-log {
                 display: none !important;
             }
-            
-            /* Container adjustments */
-            .game-container {
-                padding: 8px !important;
-                padding-bottom: 100px !important; /* Increased safe area at bottom */
-                min-height: 100vh;
-                display: flex;
-                flex-direction: column;
-            }
-            
-            /* Make turn order more compact on mobile */
-            .turn-order-bar {
-                padding: 10px !important;
-                margin-bottom: 5px !important;
-            }
-            
-            .turn-order-title {
-                font-size: 12px !important;
-                margin-bottom: 8px !important;
-            }
-            
-            .turn-indicator {
-                width: 35px !important;
-                height: 35px !important;
-                font-size: 11px !important;
-            }
-            
-            /* Remove any flex-grow that might cause spacing issues */
-            .tab-content {
-                flex-grow: 0 !important;
-            }
-            
-            /* Ensure battle arena has proper spacing */
-            .battle-arena {
-                padding-bottom: 120px !important; /* Space for controls */
-            }
-            
-            /* Improve button touch targets */
-            .attack-btn {
-                min-height: 44px !important; /* iOS minimum touch target */
-            }
-            
-            /* Better spacing for attack selection text */
-            .attack-buttons > div:first-child {
-                margin-bottom: 12px !important;
-                padding: 0 10px !important;
-            }
-            
-            .log-entry.player-attack {
-                color: #2e7d32;
-                font-weight: bold;
-            }
-
-            .log-entry.enemy-attack {
-                color: #c62828;
-                font-weight: bold;
-            }
-
-            .log-entry.player-attack.super-effective {
-                color: #1b5e20;
-                background: rgba(76, 175, 80, 0.1);
-                border-left: 3px solid #4caf50;
-                padding-left: 8px;
-            }
-
-            .log-entry.enemy-attack.super-effective {
-                color: #b71c1c;
-                background: rgba(244, 67, 54, 0.1);
-                border-left: 3px solid #f44336;
-                padding-left: 8px;
-            }
-
-            .log-entry.player-attack.not-very-effective {
-                color: #388e3c;
-                opacity: 0.8;
-            }
-
-            .log-entry.enemy-attack.not-very-effective {
-                color: #d32f2f;
-                opacity: 0.8;
-            }
-            
-            /* FIXED target selection button layout - ensure all 3 buttons fit */
-            .attack-buttons .attack-btn[style*="background"] {
-                min-width: 100px !important; /* Smaller for target buttons */
-                max-width: 120px !important;
-                padding: 10px 12px !important;
-                font-size: 12px !important;
-                margin: 2px !important;
-                flex: 1 1 100px !important; /* Fixed basis for consistent sizing */
-                white-space: nowrap !important;
-                overflow: hidden !important;
-                text-overflow: ellipsis !important;
-            }
-            
-            /* Ensure target container fits properly with all 3 buttons */
-            .attack-buttons > div:last-child {
-                display: flex !important;
-                gap: 6px !important; /* Reduced gap */
-                justify-content: center !important;
-                flex-wrap: wrap !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                padding: 0 5px !important; /* Add small padding for edge spacing */
-            }
-            
-            /* Additional responsive adjustments for very small screens */
-            @media (max-width: 360px) {
-                .attack-buttons .attack-btn[style*="background"] {
-                    min-width: 90px !important;
-                    max-width: 110px !important;
-                    padding: 8px 10px !important;
-                    font-size: 11px !important;
-                    flex: 1 1 90px !important;
-                }
-                
-                .attack-buttons > div:last-child {
-                    gap: 4px !important;
-                }
-            }
-            
-            /* Mobile-optimized damage numbers with effectiveness indicators */
-            .damage-number {
-                font-size: 24px !important;
-                max-width: 200px !important;
-                text-align: center !important;
-                word-wrap: break-word !important;
-                line-height: 1.2 !important;
-                padding: 2px 4px !important;
-                border-radius: 8px !important;
-                background: rgba(0, 0, 0, 0.7) !important;
-                backdrop-filter: blur(4px) !important;
-            }
-            
-            .damage-number.super-effective {
-                font-size: 28px !important;
-                background: rgba(46, 125, 50, 0.8) !important;
-            }
-            
-            .damage-number.not-very-effective {
-                font-size: 20px !important;
-                background: rgba(230, 81, 0, 0.8) !important;
-            }
         }
-
-        .difficulty-btn {
-            padding: 10px 20px;
-            border: 2px solid #ddd;
-            background: white;
-            color: #666;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .difficulty-btn:hover:not(.active) {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-color: #999;
-        }
-
-        .difficulty-btn.active {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            border-width: 3px;
-        }
-
-        /* Inactive state - all buttons have subtle gradient */
-        .difficulty-btn[data-difficulty="easy"] {
-            background: #f9f9f9;
-            border-color: #e0e0e0;
-        }
-
-        .difficulty-btn[data-difficulty="normal"] {
-            background: #f5f5f5;
-            border-color: #d0d0d0;
-        }
-
-        .difficulty-btn[data-difficulty="hard"] {
-            background: #eeeeee;
-            border-color: #bdbdbd;
-        }
-
-        .difficulty-btn[data-difficulty="extreme"] {
-            background: #e0e0e0;
-            border-color: #9e9e9e;
-        }
-
-        /* Active state - strong visual indicator */
-        .difficulty-btn[data-difficulty="easy"].active {
-            background: linear-gradient(135deg, #ffffff, #f0f0f0);
-            border-color: #4caf50;
-            color: #2e7d32;
-            position: relative;
-        }
-
-        .difficulty-btn[data-difficulty="normal"].active {
-            background: linear-gradient(135deg, #e8e8e8, #d0d0d0);
-            border-color: #ff9800;
-            color: #424242;
-        }
-
-        .difficulty-btn[data-difficulty="hard"].active {
-            background: linear-gradient(135deg, #9e9e9e, #757575);
-            border-color: #ff5722;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        .difficulty-btn[data-difficulty="extreme"].active {
-            background: linear-gradient(135deg, #424242, #212121);
-            border-color: #d32f2f;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-        }
-
-        /* Add a glow effect for active buttons */
-        .difficulty-btn.active::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: inherit;
-            border-radius: 20px;
-            opacity: 0.3;
-            z-index: -1;
-            filter: blur(8px);
-        }
-
-        /* Make the small text more visible */
-        .difficulty-btn small {
-            display: block;
-            font-size: 10px;
-            opacity: 0.8;
-            margin-top: 2px;
-        }
-
-        .difficulty-btn.active small {
-            opacity: 1;
-            font-weight: normal;
-        }
-
-        @keyframes slideLeft {
-            0% { transform: translateX(50px); opacity: 0.7; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
-
-        .turn-order-list {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            transition: all 0.3s ease;
-        }
-
-        .turn-indicator {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 2px solid #ddd;
-            display: flex;
+        .mobile-battle-log-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 3000;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+        }
+        .mobile-battle-log-modal.show {
+            display: flex;
+        }
+        .mobile-battle-log-content {
             background: white;
-            transition: all 0.3s ease;
+            border-radius: 20px;
+            padding: 30px 18px 18px 18px;
+            max-width: 95vw;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
             position: relative;
+            text-align: left;
         }
-
-        .turn-indicator.active {
-            border-color: #4ecdc4;
-            background: #4ecdc4;
+        .mobile-battle-log-close {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            background: #ff6b6b;
             color: white;
-            transform: scale(1.2);
-            box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
-            animation: pulse 1s ease-in-out infinite;
+            border: none;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 6px 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1.2); }
-            50% { transform: scale(1.3); }
+        .mobile-battle-log-title {
+            font-weight: bold;
+            color: #4ecdc4;
+            font-size: 18px;
+            margin-bottom: 12px;
+            text-align: center;
         }
-
-        .battle-sprite.single-gene {
-            background: linear-gradient(135deg, var(--gene-color), white) !important;
+        .mobile-battle-log-entries {
+            font-size: 14px;
+            color: #666;
+            max-height: 60vh;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -1928,7 +1313,17 @@
                     <div class="attack-buttons" id="attackButtons"></div>
                     <div class="battle-log" id="battleLog"></div>
                 </div>
+                <!-- 4. Mobile floating battle log button -->
+                <button class="mobile-battle-log-btn" id="mobileBattleLogBtn" style="display:none;">📜 Logs</button>
             </div>
+        </div>
+    </div>
+    <!-- 4. Mobile battle log modal overlay -->
+    <div class="mobile-battle-log-modal" id="mobileBattleLogModal">
+        <div class="mobile-battle-log-content">
+            <button class="mobile-battle-log-close" id="mobileBattleLogClose">Close</button>
+            <div class="mobile-battle-log-title">Battle Log</div>
+            <div class="mobile-battle-log-entries" id="mobileBattleLogEntries"></div>
         </div>
     </div>
 
@@ -2748,6 +2143,11 @@
                 
                 document.getElementById('team-setup').style.display = 'block';
                 document.getElementById('battle-arena').style.display = 'none';
+                // 5. Hide mobile log modal and log button
+                const modal = document.getElementById('mobileBattleLogModal');
+                if (modal) modal.classList.remove('show');
+                const mobileLogBtn = document.getElementById('mobileBattleLogBtn');
+                if (mobileLogBtn) mobileLogBtn.style.display = 'none';
                 
                 // Reset battle log
                 this.battleLog = [];
@@ -2865,7 +2265,9 @@
             renderBattleArena() {
                 document.getElementById('team-setup').style.display = 'none';
                 document.getElementById('battle-arena').style.display = 'block';
-                
+                // 5. Hide mobile log modal if open
+                const modal = document.getElementById('mobileBattleLogModal');
+                if (modal) modal.classList.remove('show');
                 this.updateBattleDisplay();
                 
                 // Add quit button listener
@@ -2882,6 +2284,15 @@
                 this.updateTeamDisplays();
                 this.updateTurnOrder();
                 this.updateBattleControls();
+                // 4. Update mobile battle log if modal is open
+                if (window.innerWidth <= 768 && document.getElementById('mobileBattleLogModal').classList.contains('show')) {
+                    updateMobileBattleLog();
+                }
+                // 4. Show/hide mobile log button
+                const mobileLogBtn = document.getElementById('mobileBattleLogBtn');
+                if (mobileLogBtn) {
+                    mobileLogBtn.style.display = (window.innerWidth <= 768 && this.battlePhase === 'battle') ? 'block' : 'none';
+                }
             }
 
             updateTeamDisplays() {
@@ -2907,8 +2318,6 @@
                 div.className = 'battle-character';
                 div.dataset.battleChar = character.id;
                 div.dataset.team = character.isPlayer ? 'player' : 'enemy'; // Add team identifier
-                
-                // Rest of the method remains the same...
                 
                 if (character.hp <= 0) {
                     div.classList.add('defeated');
@@ -3217,6 +2626,13 @@
                         
                         // Update battle team selection when switching to battle tab
                         if (targetTab === 'battle') {
+                            document.getElementById('team-setup').style.display = 'block';
+                            document.getElementById('battle-arena').style.display = 'none';
+                            // Hide mobile log modal and log button
+                            const modal = document.getElementById('mobileBattleLogModal');
+                            if (modal) modal.classList.remove('show');
+                            const mobileLogBtn = document.getElementById('mobileBattleLogBtn');
+                            if (mobileLogBtn) mobileLogBtn.style.display = 'none';
                             this.updateBattleTeamSelection();
                         }
                     });
@@ -3318,6 +2734,590 @@
                 if (this.selectedCharacters.includes(characterId)) {
                     this.selectedCharacters = this.selectedCharacters.filter(id => id !== characterId);
                 } else if (this.selectedCharacters.length < 2) {
+                    this.selectedCharacters.push(characterId);
+                } else {
+                    this.selectedCharacters[0] = this.selectedCharacters[1];
+                    this.selectedCharacters[1] = characterId;
+                }
+
+                this.updateDisplay();
+            }
+
+            updateDisplay() {
+                // Update character slot selection states
+                document.querySelectorAll('.character-slot').forEach(slot => {
+                    const characterId = slot.dataset.characterId;
+                    if (this.selectedCharacters.includes(characterId)) {
+                        slot.classList.add('selected');
+                    } else {
+                        slot.classList.remove('selected');
+                    }
+                });
+
+                // Update parent displays
+                this.updateParentDisplay('parent1Display', this.selectedCharacters[0]);
+                this.updateParentDisplay('parent2Display', this.selectedCharacters[1]);
+
+                // Update breed button
+                const breedBtn = document.getElementById('breedBtn');
+                if (this.botActive) {
+                    breedBtn.disabled = true;
+                    breedBtn.textContent = 'Bot is in Control';
+                } else if (this.selectedCharacters.length === 2) {
+                    breedBtn.disabled = false;
+                    breedBtn.textContent = 'Breed Creatures';
+                } else {
+                    breedBtn.disabled = true;
+                    breedBtn.textContent = 'Select Two Creatures to Breed';
+                }
+
+                // Update progress
+                const unlockedCount = Object.values(this.characters).filter(c => c.unlocked).length;
+                const totalCount = Object.keys(this.characters).length;
+                const progress = (unlockedCount / totalCount) * 100;
+                
+                document.getElementById('progressFill').style.width = `${progress}%`;
+                document.getElementById('unlockedCount').textContent = unlockedCount;
+
+                // Check for victory
+                if (unlockedCount === totalCount && !this.victoryShown) {
+                    this.victoryShown = true;
+                    setTimeout(() => this.showVictory(), 1000);
+                }
+            }
+
+            updateParentDisplay(displayId, characterId) {
+                const display = document.getElementById(displayId);
+                const sprite = display.querySelector('.character-sprite');
+                
+                if (characterId && this.characters[characterId]) {
+                    const character = this.characters[characterId];
+                    this.updateCharacterSprite(sprite, character);
+                } else {
+                    sprite.textContent = '?';
+                    sprite.innerHTML = '?';
+                    sprite.className = 'character-sprite locked-sprite';
+                    sprite.style.removeProperty('--gene-color');
+                    sprite.style.removeProperty('--primary-color');
+                    sprite.style.removeProperty('--secondary-color');
+                    sprite.style.removeProperty('--same-gene-gradient');
+                }
+            }
+
+            updateBattleTeamSelection() {
+                const selectionGrid = document.getElementById('battleCharacterSelection');
+                const selectedTeamDisplay = document.getElementById('selectedTeamDisplay');
+                const startBattleBtn = document.getElementById('startBattleBtn');
+                
+                if (!selectionGrid) return;
+                
+                // Clear existing content
+                selectionGrid.innerHTML = '';
+                
+                // Add unlocked characters to selection
+                const unlockedChars = Object.values(this.characters).filter(char => char.unlocked);
+                unlockedChars.forEach(character => {
+                    const slot = document.createElement('div');
+                    slot.className = 'selection-slot';
+                    if (this.selectedBattleTeam.includes(character.id)) {
+                        slot.classList.add('selected');
+                    }
+                    
+                    const sprite = document.createElement('div');
+                    sprite.className = 'character-sprite';
+                    this.updateCharacterSprite(sprite, character);
+                    
+                    slot.appendChild(sprite);
+                    slot.addEventListener('click', () => this.toggleBattleTeamSelection(character.id));
+                    selectionGrid.appendChild(slot);
+                });
+                
+                // Update selected team display
+                selectedTeamDisplay.innerHTML = '';
+                this.selectedBattleTeam.forEach(charId => {
+                    const character = this.characters[charId];
+                    const slot = document.createElement('div');
+                    slot.className = 'character-slot unlocked';
+                    
+                    const sprite = document.createElement('div');
+                    sprite.className = 'character-sprite';
+                    this.updateCharacterSprite(sprite, character);
+                    
+                    slot.appendChild(sprite);
+                    selectedTeamDisplay.appendChild(slot);
+                });
+                
+                // Add empty slots
+                for (let i = this.selectedBattleTeam.length; i < 3; i++) {
+                    const slot = document.createElement('div');
+                    slot.className = 'character-slot locked';
+                    const sprite = document.createElement('div');
+                    sprite.className = 'character-sprite locked-sprite';
+                    sprite.textContent = '?';
+                    slot.appendChild(sprite);
+                    selectedTeamDisplay.appendChild(slot);
+                }
+                
+                // Update start battle button
+                if (this.selectedBattleTeam.length === 3) {
+                    startBattleBtn.disabled = false;
+                    startBattleBtn.textContent = 'Start Battle!';
+                } else {
+                    startBattleBtn.disabled = true;
+                    startBattleBtn.textContent = `Select ${3 - this.selectedBattleTeam.length} more creature${3 - this.selectedBattleTeam.length !== 1 ? 's' : ''} to Start Battle`;
+                }
+            }
+
+            toggleBattleTeamSelection(characterId) {
+                if (this.selectedBattleTeam.includes(characterId)) {
+                    this.selectedBattleTeam = this.selectedBattleTeam.filter(id => id !== characterId);
+                } else if (this.selectedBattleTeam.length < 3) {
+                    this.selectedBattleTeam.push(characterId);
+                }
+                
+                this.updateBattleTeamSelection();
+            }
+
+            selectRandomTeam() {
+                // Get all unlocked characters
+                const unlockedCharacters = Object.values(this.characters).filter(char => char.unlocked);
+                
+                if (unlockedCharacters.length < 3) {
+                    alert('You need at least 3 unlocked characters to use random selection!');
+                    return;
+                }
+                
+                // Clear current selection
+                this.selectedBattleTeam = [];
+                
+                // Randomly select 3 different characters
+                const shuffled = [...unlockedCharacters].sort(() => 0.5 - Math.random());
+                this.selectedBattleTeam = shuffled.slice(0, 3).map(char => char.id);
+                
+                this.updateBattleTeamSelection();
+            }
+
+            startBattle() {
+                if (this.selectedBattleTeam.length !== 3) return;
+                
+                // 5. Hide team-setup, show battle-arena (mobile and desktop)
+                document.getElementById('team-setup').style.display = 'none';
+                document.getElementById('battle-arena').style.display = 'block';
+                // Hide mobile log modal and log button initially
+                const modal = document.getElementById('mobileBattleLogModal');
+                if (modal) modal.classList.remove('show');
+                const mobileLogBtn = document.getElementById('mobileBattleLogBtn');
+                if (mobileLogBtn) mobileLogBtn.style.display = (window.innerWidth <= 768) ? 'block' : 'none';
+                // ...existing code...
+                const playerTeam = this.selectedBattleTeam.map(id => this.characters[id]);
+                this.battleSystem.setupBattle(playerTeam);
+            }
+
+            breed() {
+                if (this.selectedCharacters.length !== 2) return;
+
+                const parent1 = this.characters[this.selectedCharacters[0]];
+                const parent2 = this.characters[this.selectedCharacters[1]];
+
+                const possibleOffspring = this.getPossibleOffspring(parent1, parent2);
+                const lockedOffspring = possibleOffspring.filter(id => !this.characters[id].unlocked);
+
+                this.startBreedingAnimation(possibleOffspring, lockedOffspring);
+            }
+
+            startBreedingAnimation(possibleOffspring, lockedOffspring) {
+                const breedBtn = document.getElementById('breedBtn');
+                const preview = document.getElementById('breedingPreview');
+                const previewChar = document.getElementById('previewCharacter');
+                
+                const actualResult = lockedOffspring.length > 0 ? 
+                    lockedOffspring[Math.floor(Math.random() * lockedOffspring.length)] : 
+                    possibleOffspring[Math.floor(Math.random() * possibleOffspring.length)];
+                
+                breedBtn.disabled = true;
+                breedBtn.classList.add('breeding');
+                breedBtn.textContent = 'Breeding...';
+                
+                preview.classList.add('show');
+                
+                let animationStep = 0;
+                const totalSteps = Math.floor(20 / this.speedMultiplier);
+                const animationSpeed = Math.floor(150 / this.speedMultiplier);
+                
+                const animationInterval = setInterval(() => {
+                    let displayCharacter;
+                    if (animationStep < totalSteps - 3) {
+                        const randomOffspring = possibleOffspring[Math.floor(Math.random() * possibleOffspring.length)];
+                        displayCharacter = this.characters[randomOffspring];
+                    } else {
+                        displayCharacter = this.characters[actualResult];
+                    }
+                    
+                    this.updatePreviewCharacter(previewChar, displayCharacter);
+                    this.createBreedingSparkles(previewChar, this.speedMultiplier > 1);
+                    
+                    animationStep++;
+                    
+                    if (animationStep >= totalSteps) {
+                        clearInterval(animationInterval);
+                        this.showFinalResult(actualResult, lockedOffspring);
+                    }
+                }, animationSpeed);
+            }
+
+            updatePreviewCharacter(previewChar, character) {
+                previewChar.className = 'preview-character';
+                
+                if (character.genes.length === 1) {
+                    previewChar.className += ' single-gene';
+                    previewChar.style.setProperty('--gene-color', GENE_COLORS[character.genes[0]]);
+                    previewChar.textContent = character.symbol;
+                    previewChar.innerHTML = character.symbol;
+                } else {
+                    const isSameGene = character.genes[0] === character.genes[1];
+                    previewChar.className += ' double-gene';
+                    
+                    if (isSameGene) {
+                        previewChar.classList.add('same-gene');
+                        const geneColor = GENE_COLORS[character.genes[0]];
+                        const darkColor = GENE_DARK_COLORS[character.genes[0]];
+                        previewChar.style.setProperty('--same-gene-gradient', 
+                            `linear-gradient(45deg, ${geneColor}, ${darkColor}, ${geneColor})`);
+                    } else {
+                        previewChar.classList.add('different-genes');
+                        previewChar.style.setProperty('--primary-color', GENE_COLORS[character.genes[0]]);
+                        previewChar.style.setProperty('--secondary-color', GENE_COLORS[character.genes[1]]);
+                    }
+                    
+                    previewChar.innerHTML = '';
+                    const emoji1 = document.createElement('span');
+                    emoji1.className = 'gene-emoji';
+                    emoji1.textContent = GENE_SYMBOLS[character.genes[0]];
+                    
+                    const emoji2 = document.createElement('span');
+                    emoji2.className = 'gene-emoji';
+                    emoji2.textContent = GENE_SYMBOLS[character.genes[1]];
+                    
+                    previewChar.appendChild(emoji1);
+                    previewChar.appendChild(emoji2);
+                }
+            }
+
+            showFinalResult(actualResult, lockedOffspring) {
+                const previewChar = document.getElementById('previewCharacter');
+                const resultCharacter = this.characters[actualResult];
+                
+                const sunshine = document.createElement('div');
+                sunshine.className = 'sunshine-effect';
+                previewChar.appendChild(sunshine);
+                
+                this.updatePreviewCharacter(previewChar, resultCharacter);
+                
+                setTimeout(() => {
+                    sunshine.remove();
+                    this.finishBreeding(lockedOffspring, actualResult);
+                }, Math.floor(2000 / this.speedMultiplier));
+            }
+
+            createBreedingSparkles(container, isFastMode = false) {
+                const sparkleCount = isFastMode ? 3 : 5;
+                const duration = isFastMode ? Math.floor(400 / this.speedMultiplier) : Math.floor(800 / this.speedMultiplier);
+                
+                for (let i = 0; i < sparkleCount; i++) {
+                    setTimeout(() => {
+                        const sparkle = document.createElement('div');
+                        sparkle.className = 'breeding-sparkle';
+                        
+                        const angle = (Math.PI * 2 * i) / sparkleCount;
+                        const radius = 60 + Math.random() * 20;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        
+                        sparkle.style.left = `${50 + (x / 150) * 100}%`;
+                        sparkle.style.top = `${50 + (y / 150) * 100}%`;
+                        sparkle.style.background = `hsl(${Math.random() * 360}, 100%, 80%)`;
+                        
+                        container.appendChild(sparkle);
+                        
+                        const animation = sparkle.animate([
+                            { transform: 'scale(0) rotate(0deg)', opacity: 1 },
+                            { transform: 'scale(1) rotate(180deg)', opacity: 1, offset: 0.5 },
+                            { transform: 'scale(0) rotate(360deg)', opacity: 0 }
+                        ], {
+                            duration: duration,
+                            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                        });
+                        
+                        animation.onfinish = () => sparkle.remove();
+                    }, i * Math.floor((isFastMode ? 25 : 50) / this.speedMultiplier));
+                }
+            }
+
+            finishBreeding(lockedOffspring, actualResult) {
+                const breedBtn = document.getElementById('breedBtn');
+                const preview = document.getElementById('breedingPreview');
+                
+                setTimeout(() => {
+                    preview.classList.remove('show');
+                    
+                    if (lockedOffspring.length > 0 && actualResult) {
+                        this.unlockCharacter(actualResult);
+                        this.createParticleEffect();
+                    }
+
+                    breedBtn.classList.remove('breeding');
+                    breedBtn.disabled = false;
+                    
+                    this.selectedCharacters = [];
+                    this.updateDisplay();
+                }, 500);
+            }
+
+            getPossibleOffspring(parent1, parent2) {
+                const offspring = [];
+                
+                parent1.genes.forEach(gene1 => {
+                    parent2.genes.forEach(gene2 => {
+                        const combo1 = `${gene1}-${gene2}`;
+                        const combo2 = `${gene2}-${gene1}`;
+                        
+                        if (!offspring.includes(combo1)) {
+                            offspring.push(combo1);
+                        }
+                        if (!offspring.includes(combo2) && combo1 !== combo2) {
+                            offspring.push(combo2);
+                        }
+                    });
+                });
+
+                return offspring;
+            }
+
+            unlockCharacter(characterId) {
+                this.characters[characterId].unlocked = true;
+                
+                const slot = document.querySelector(`[data-character-id="${characterId}"]`);
+                if (slot) {
+                    slot.classList.remove('locked');
+                    slot.classList.add('unlocked', 'new-discovery');
+                    
+                    const sprite = slot.querySelector('.character-sprite');
+                    const character = this.characters[characterId];
+                    
+                    this.updateCharacterSprite(sprite, character);
+
+                    slot.addEventListener('click', () => this.selectCharacter(characterId));
+                    setTimeout(() => slot.classList.remove('new-discovery'), 800);
+                }
+            }
+
+            createParticleEffect() {
+                const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#a8e6cf', '#ff8b94', '#b4a7d6'];
+                
+                for (let i = 0; i < 20; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.className = 'particle';
+                        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        particle.style.left = Math.random() * window.innerWidth + 'px';
+                        particle.style.top = Math.random() * window.innerHeight + 'px';
+
+                        document.body.appendChild(particle);
+
+                        const animation = particle.animate([
+                            { transform: 'translateY(0px) scale(1)', opacity: 1 },
+                            { transform: 'translateY(-100px) scale(0)', opacity: 0 }
+                        ], {
+                            duration: 2000,
+                            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                        });
+
+                        animation.onfinish = () => particle.remove();
+                    }, i * 50);
+                }
+            }
+
+            showVictory() {
+                const victoryMessage = document.getElementById('victoryMessage');
+                victoryMessage.classList.add('show');
+                
+                // Auto-hide after 4 seconds
+                setTimeout(() => {
+                    victoryMessage.classList.remove('show');
+                }, 4000);
+            }
+
+            setupEventListeners() {
+                document.getElementById('breedBtn').addEventListener('click', () => this.breed());
+                document.getElementById('botToggle').addEventListener('change', (e) => this.toggleBot(e.target.checked));
+                document.getElementById('resetButton').addEventListener('click', () => this.showResetConfirmation());
+                document.getElementById('confirmReset').addEventListener('click', () => this.confirmReset());
+                document.getElementById('cancelReset').addEventListener('click', () => this.cancelReset());
+                document.getElementById('startBattleBtn').addEventListener('click', () => this.startBattle());
+                document.getElementById('unlockAllBtn').addEventListener('click', () => this.unlockAllCharacters());
+                document.getElementById('randomSelectBtn').addEventListener('click', () => this.selectRandomTeam());
+
+                // Add this to setupEventListeners method
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('active'));
+                        e.target.closest('.difficulty-btn').classList.add('active');
+                        const difficulty = e.target.closest('.difficulty-btn').dataset.difficulty;
+                        this.battleSystem.setDifficulty(difficulty);
+                    });
+                });
+                
+                // Speed control listeners
+                document.querySelectorAll('.speed-radio').forEach(radio => {
+                    radio.addEventListener('click', (e) => {
+                        const speed = parseInt(e.target.dataset.speed);
+                        this.setSpeed(speed);
+                    });
+                });
+                
+                // 4. Mobile battle log button and modal listeners
+                document.getElementById('mobileBattleLogBtn').addEventListener('click', () => {
+                    updateMobileBattleLog();
+                    document.getElementById('mobileBattleLogModal').classList.add('show');
+                });
+                document.getElementById('mobileBattleLogClose').addEventListener('click', () => {
+                    document.getElementById('mobileBattleLogModal').classList.remove('show');
+                });
+            }
+
+            showResetConfirmation() {
+                document.getElementById('confirmationPopup').classList.add('show');
+            }
+
+            confirmReset() {
+                document.getElementById('confirmationPopup').classList.remove('show');
+                this.resetGame();
+            }
+
+            cancelReset() {
+                document.getElementById('confirmationPopup').classList.remove('show');
+            }
+
+            setSpeed(multiplier) {
+                this.speedMultiplier = multiplier;
+                
+                // Update UI
+                document.querySelectorAll('.speed-radio').forEach(radio => {
+                    radio.classList.remove('active');
+                });
+                document.querySelector(`[data-speed="${multiplier}"]`).classList.add('active');
+            }
+
+            resetGame() {
+                this.stopBotSolver();
+                
+                // Reset victory flag and hide message properly
+                this.victoryShown = false;
+                const victoryMessage = document.getElementById('victoryMessage');
+                victoryMessage.classList.remove('show');
+                
+                this.characters = this.generateCharacters();
+                this.selectedCharacters = [];
+                this.selectedBattleTeam = [];
+                this.botActive = false;
+                this.speedMultiplier = 1;
+                this.battleSystem = new BattleSystem(this);
+                
+                document.getElementById('botToggle').checked = false;
+                document.getElementById('botStatus').textContent = 'Bot is off - You\'re in control';
+                document.getElementById('botStatus').classList.remove('active');
+                
+                // Reset speed controls
+                document.querySelectorAll('.speed-radio').forEach(radio => {
+                    radio.classList.remove('active');
+                });
+                document.querySelector('[data-speed="1"]').classList.add('active');
+                
+                // Return to breeding tab
+                document.querySelector('[data-tab="breeding"]').click();
+                
+                this.createTable();
+                this.updateDisplay();
+                this.updateBattleTeamSelection();
+            }
+
+            toggleBot(active) {
+                this.botActive = active;
+                const status = document.getElementById('botStatus');
+                
+                if (active) {
+                    status.textContent = 'Bot is solving - Sit back and watch!';
+                    status.classList.add('active');
+                    this.startBotSolver();
+                } else {
+                    status.textContent = 'Bot is off - You\'re in control';
+                    status.classList.remove('active');
+                    this.stopBotSolver();
+                }
+            }
+
+            startBotSolver() {
+                if (this.botInterval) return;
+                
+                this.botInterval = setInterval(() => {
+                    if (!this.botActive) return;
+                    
+                    const bestPair = this.findBestBreedingPair();
+                    if (bestPair) {
+                        this.selectedCharacters = bestPair;
+                        this.updateDisplay();
+                        
+                        setTimeout(() => {
+                            if (this.botActive) {
+                                this.breed();
+                            }
+                        }, 1000);
+                    }
+                }, 4000);
+            }
+
+            stopBotSolver() {
+                if (this.botInterval) {
+                    clearInterval(this.botInterval);
+                    this.botInterval = null;
+                }
+                this.selectedCharacters = [];
+                this.updateDisplay();
+            }
+
+            findBestBreedingPair() {
+                const unlockedCharacters = Object.keys(this.characters).filter(id => this.characters[id].unlocked);
+                const lockedCharacters = Object.keys(this.characters).filter(id => !this.characters[id].unlocked);
+                
+                if (lockedCharacters.length === 0) return null;
+                
+                let bestPair = null;
+                let maxPotentialUnlocks = 0;
+                
+                for (let i = 0; i < unlockedCharacters.length; i++) {
+                    for (let j = i; j < unlockedCharacters.length; j++) {
+                        const char1 = this.characters[unlockedCharacters[i]];
+                        const char2 = this.characters[unlockedCharacters[j]];
+                        
+                        const offspring = this.getPossibleOffspring(char1, char2);
+                        const potentialUnlocks = offspring.filter(id => !this.characters[id].unlocked).length;
+                        
+                        if (potentialUnlocks > maxPotentialUnlocks) {
+                            maxPotentialUnlocks = potentialUnlocks;
+                            bestPair = [unlockedCharacters[i], unlockedCharacters[j]];
+                        }
+                    }
+                }
+                
+                return bestPair;
+            }
+        }
+
+        // Start the game
+        new BreedingGame();
+    </script>
+</body>
+</html>
                     this.selectedCharacters.push(characterId);
                 } else {
                     this.selectedCharacters[0] = this.selectedCharacters[1];
