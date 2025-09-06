@@ -984,13 +984,13 @@
         }
 
         .battle-sprite {
-            width: 60px;
-            height: 60px;
+            width: 80px;  /* Changed from 60px */
+            height: 80px;  /* Changed from 60px */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 24px;  /* Changed from 20px */
             font-weight: bold;
             color: white;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
@@ -1000,9 +1000,9 @@
 
         @media (min-width: 768px) {
             .battle-sprite {
-                width: 80px;
-                height: 80px;
-                font-size: 28px;
+                width: 100px;  /* Changed from 80px */
+                height: 100px;  /* Changed from 80px */
+                font-size: 32px;  /* Changed from 28px */
             }
         }
 
@@ -1062,7 +1062,9 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 14px;
-            min-width: 100px;
+            min-width: 100px;  /* Changed to match target buttons */
+            max-width: 120px;  /* Added to match target buttons */
+            flex: 1 1 100px;   /* Added to match target buttons */
             position: relative;
             overflow: hidden;
         }
@@ -1119,6 +1121,80 @@
             border: 1px solid #ddd;
             margin-top: 15px;
         }
+
+        /* Mobile battle log button and modal */
+            .battle-log-button {
+                display: none;
+                position: fixed;
+                bottom: 170px;
+                right: 20px;
+                background: linear-gradient(45deg, #4ecdc4, #44a08d);
+                color: white;
+                border: none;
+                padding: 10px 15px;
+                border-radius: 25px;
+                font-weight: bold;
+                cursor: pointer;
+                z-index: 999;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            }
+
+            .battle-log-modal {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.8);
+                z-index: 2000;
+            }
+
+            .battle-log-modal.show {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .battle-log-modal-content {
+                background: white;
+                border-radius: 20px;
+                padding: 20px;
+                margin: 20px;
+                max-width: 500px;
+                width: 100%;
+                max-height: 80vh;
+                overflow-y: auto;
+            }
+
+            .battle-log-modal-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e0e0e0;
+            }
+
+            .battle-log-modal-close {
+                background: #ff6b6b;
+                color: white;
+                border: none;
+                padding: 8px 15px;
+                border-radius: 15px;
+                cursor: pointer;
+                font-weight: bold;
+            }
+
+            @media (max-width: 768px) {
+                .battle-log-button {
+                    display: block;
+                }
+                
+                .battle-log {
+                    display: none !important;
+                }
+            }
 
         .log-entry {
             margin-bottom: 8px;
@@ -1392,8 +1468,8 @@
             
             /* REMOVE WASTED SPACE - tight battle arena */
             .battle-arena {
-                padding-bottom: 140px !important; /* Increased space for controls */
-                gap: 5px !important;
+                padding-bottom: 140px !important;
+                gap: 10px !important;  /* Changed from gap: 5px */
                 padding-top: 0 !important;
                 display: flex !important;
                 flex-direction: column !important;
@@ -1415,7 +1491,7 @@
             .battle-controls {
                 padding: 15px !important;
                 position: fixed !important;
-                bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
+                bottom: 20px !important;  /* Changed from max(30px, env(...)) */
                 left: 10px !important;
                 right: 10px !important;
                 background: rgba(255, 255, 255, 0.98) !important;
@@ -1928,6 +2004,17 @@
                     <div class="attack-buttons" id="attackButtons"></div>
                     <div class="battle-log" id="battleLog"></div>
                 </div>
+
+                <button class="battle-log-button" id="battleLogButton">📜 Logs</button>
+                    <div class="battle-log-modal" id="battleLogModal">
+                        <div class="battle-log-modal-content">
+                            <div class="battle-log-modal-header">
+                                <h3 style="margin: 0; color: #666;">Battle Log</h3>
+                                <button class="battle-log-modal-close" id="battleLogModalClose">✕ Close</button>
+                            </div>
+                            <div class="battle-log" id="battleLogModalContent"></div>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
@@ -2746,14 +2833,30 @@
                 // Clear all running timers first!
                 this.clearAllTimers();
                 
-                document.getElementById('team-setup').style.display = 'block';
-                document.getElementById('battle-arena').style.display = 'none';
+                // Properly hide battle arena and show team setup
+                const teamSetup = document.getElementById('team-setup');
+                const battleArena = document.getElementById('battle-arena');
+                
+                if (teamSetup) teamSetup.style.display = 'block';
+                if (battleArena) battleArena.style.display = 'none';
                 
                 // Reset battle log
                 this.battleLog = [];
                 const logElement = document.getElementById('battleLog');
                 if (logElement) {
                     logElement.innerHTML = '';
+                }
+                
+                // Also clear modal log on mobile
+                const modalLogElement = document.getElementById('battleLogModalContent');
+                if (modalLogElement) {
+                    modalLogElement.innerHTML = '';
+                }
+                
+                // Hide battle log modal if open
+                const battleLogModal = document.getElementById('battleLogModal');
+                if (battleLogModal) {
+                    battleLogModal.classList.remove('show');
                 }
                 
                 this.game.battleSystem = new BattleSystem(this.game);
@@ -2863,8 +2966,12 @@
             }
 
             renderBattleArena() {
-                document.getElementById('team-setup').style.display = 'none';
-                document.getElementById('battle-arena').style.display = 'block';
+                const teamSetup = document.getElementById('team-setup');
+                const battleArena = document.getElementById('battle-arena');
+                
+                // Ensure proper visibility states
+                if (teamSetup) teamSetup.style.display = 'none';
+                if (battleArena) battleArena.style.display = 'block';
                 
                 this.updateBattleDisplay();
                 
@@ -3750,6 +3857,34 @@
                         this.setSpeed(speed);
                     });
                 });
+
+                // Battle log modal for mobile
+                const battleLogButton = document.getElementById('battleLogButton');
+                const battleLogModal = document.getElementById('battleLogModal');
+                const battleLogModalClose = document.getElementById('battleLogModalClose');
+
+                if (battleLogButton) {
+                    battleLogButton.addEventListener('click', () => {
+                        battleLogModal.classList.add('show');
+                        // Copy battle log content to modal
+                        const modalContent = document.getElementById('battleLogModalContent');
+                        modalContent.innerHTML = document.getElementById('battleLog').innerHTML;
+                    });
+                }
+
+                if (battleLogModalClose) {
+                    battleLogModalClose.addEventListener('click', () => {
+                        battleLogModal.classList.remove('show');
+                    });
+                }
+
+                if (battleLogModal) {
+                    battleLogModal.addEventListener('click', (e) => {
+                        if (e.target === battleLogModal) {
+                            battleLogModal.classList.remove('show');
+                        }
+                    });
+                }
             }
 
             showResetConfirmation() {
