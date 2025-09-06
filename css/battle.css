@@ -161,6 +161,9 @@
     text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
     border: 2px solid #ddd;
     background: white;
+    /* Ensure aspect ratio is always 1:1 */
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
 }
 
 @media (min-width: 768px) {
@@ -175,6 +178,40 @@
     background: linear-gradient(135deg, var(--gene-color), white) !important;
 }
 
+/* Add this block for correct double-gene gradients and shape */
+.character-sprite {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    border: 2px solid #ddd;
+    background: white;
+    /* Ensure aspect ratio is always 1:1 */
+    aspect-ratio: 1 / 1;
+    box-sizing: border-box;
+}
+
+/* For double gene, same gene (e.g. Red-Red) */
+.character-sprite.double-gene.same-gene {
+    background: var(--same-gene-gradient, linear-gradient(45deg, #fff, #eee, #fff)) !important;
+}
+
+/* For double gene, different genes (e.g. Red-Blue) */
+.character-sprite.double-gene.different-genes {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), white) !important;
+}
+
+.character-sprite.double-gene {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color), white) !important;
+}
+
+/* Character Stats */
 .character-stats {
     text-align: center;
     font-size: 12px;
