@@ -3154,17 +3154,17 @@
                 this.updateBattleControls(); // Refresh the UI to show disabled state
                 
                 this.selectedAttackObj = attackObj;
-                this.showTargetSelection();
+                
+                // For splash attacks, execute immediately without target selection
+                if (attackObj.type === 'splash') {
+                    this.processTurn(attackObj, null);
+                } else {
+                    this.showTargetSelection();
+                }
             }
 
             showTargetSelection() {
                 const attackButtonsElement = document.getElementById('attackButtons');
-                
-                // For splash attacks, don't show target selection - just execute immediately
-                if (this.selectedAttackObj.type === 'splash') {
-                    this.processTurn(this.selectedAttackObj, null);
-                    return;
-                }
                 
                 const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
                 
