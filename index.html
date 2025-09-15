@@ -2110,65 +2110,64 @@
             }
 
             getStatDistribution() {
-                // Define base stats for all 42 characters (HP tripled for gameplay)
-                // Budget formula: (HP÷3) + Attack + Speed = 200 for all characters
-                // 40 minimum rule applied: no stat below 40
+                // New balanced stats system from stats viewer
+                // Formula: HP/5 + ATK + SPD×5 = 100
                 const statMap = {
-                    // Single genes (HP tripled, but (HP÷3) + ATK + SPD = 200)
-                    'Red': [120, 120, 40],        // (120÷3) + 120 + 40 = 200
-                    'Orange': [240, 80, 40],      // (240÷3) + 80 + 40 = 200  
-                    'Yellow': [360, 40, 40],      // (360÷3) + 40 + 40 = 200
-                    'Green': [240, 40, 80],       // (240÷3) + 40 + 80 = 200
-                    'Blue': [120, 40, 120],       // (120÷3) + 40 + 120 = 200
-                    'Purple': [120, 80, 80],      // (120÷3) + 80 + 80 = 200
+                    // Singles
+                    'Red': [100, 60, 4],
+                    'Orange': [200, 40, 4], 
+                    'Yellow': [300, 20, 4],
+                    'Green': [200, 20, 8],
+                    'Blue': [100, 20, 12],
+                    'Purple': [100, 40, 8],
                     
-                    // Same-gene doubles (HP tripled, but (HP÷3) + ATK + SPD = 200)
-                    'Red-Red': [144, 104, 48],       // (144÷3) + 104 + 48 = 200
-                    'Orange-Orange': [216, 72, 56], // (216÷3) + 72 + 56 = 200
-                    'Yellow-Yellow': [312, 48, 48], // (312÷3) + 48 + 48 = 200
-                    'Green-Green': [216, 56, 72],   // (216÷3) + 56 + 72 = 200
-                    'Blue-Blue': [144, 48, 104],    // (144÷3) + 48 + 104 = 200
-                    'Purple-Purple': [168, 72, 72], // (168÷3) + 72 + 72 = 200
+                    // Same-gene doubles
+                    'Red-Red': [125, 50, 5],
+                    'Orange-Orange': [175, 35, 6],
+                    'Yellow-Yellow': [250, 25, 5],
+                    'Green-Green': [175, 30, 7],
+                    'Blue-Blue': [125, 25, 10],
+                    'Purple-Purple': [150, 35, 7],
                     
-                    // Different-gene doubles (HP tripled, 40 minimum rule applied)
-                    'Red-Orange': [216, 88, 40],    // (216÷3) + 88 + 40 = 200
-                    'Red-Yellow': [300, 60, 40],    // (300÷3) + 60 + 40 = 200
-                    'Red-Green': [216, 56, 72],     // (216÷3) + 56 + 72 = 200
-                    'Red-Blue': [120, 60, 100],     // (120÷3) + 60 + 100 = 200
-                    'Red-Purple': [120, 88, 72],    // (120÷3) + 88 + 72 = 200
+                    // Different-gene doubles
+                    'Red-Orange': [175, 45, 4],
+                    'Red-Yellow': [250, 30, 4],
+                    'Red-Green': [175, 30, 7],
+                    'Red-Blue': [100, 30, 10],
+                    'Red-Purple': [100, 45, 7],
 
-                    'Orange-Red': [156, 108, 40],   // (156÷3) + 108 + 40 = 200
-                    'Orange-Yellow': [324, 52, 40], // (324÷3) + 52 + 40 = 200
-                    'Orange-Green': [240, 48, 72],  // (240÷3) + 48 + 72 = 200
-                    'Orange-Blue': [156, 52, 96],   // (156÷3) + 52 + 96 = 200
-                    'Orange-Purple': [144, 80, 72], // (144÷3) + 80 + 72 = 200
+                    'Orange-Red': [125, 55, 4],
+                    'Orange-Yellow': [275, 25, 4],
+                    'Orange-Green': [200, 25, 7],
+                    'Orange-Blue': [125, 25, 10],
+                    'Orange-Purple': [125, 40, 7],
 
-                    'Yellow-Red': [180, 100, 40],   // (180÷3) + 100 + 40 = 200
-                    'Yellow-Orange': [264, 72, 40], // (264÷3) + 72 + 40 = 200
-                    'Yellow-Green': [264, 40, 72],  // (264÷3) + 40 + 72 = 200
-                    'Yellow-Blue': [180, 40, 100],  // (180÷3) + 40 + 100 = 200
-                    'Yellow-Purple': [168, 72, 72], // (168÷3) + 72 + 72 = 200
-                    
-                    'Green-Red': [156, 96, 52],     // (156÷3) + 96 + 52 = 200
-                    'Green-Orange': [240, 72, 48],  // (240÷3) + 72 + 48 = 200
-                    'Green-Yellow': [324, 40, 52],  // (324÷3) + 40 + 52 = 200
-                    'Green-Blue': [156, 40, 108],   // (156÷3) + 40 + 108 = 200
-                    'Green-Purple': [144, 72, 80],  // (144÷3) + 72 + 80 = 200
-                    
-                    'Blue-Red': [120, 100, 60],     // (120÷3) + 100 + 60 = 200
-                    'Blue-Orange': [216, 72, 56],   // (216÷3) + 72 + 56 = 200
-                    'Blue-Yellow': [300, 40, 60],   // (300÷3) + 40 + 60 = 200
-                    'Blue-Green': [216, 40, 88],    // (216÷3) + 40 + 88 = 200
-                    'Blue-Purple': [120, 72, 88],   // (120÷3) + 72 + 88 = 200
-                    
-                    'Purple-Red': [120, 108, 52],   // (120÷3) + 108 + 52 = 200
-                    'Purple-Orange': [216, 80, 48], // (216÷3) + 80 + 48 = 200
-                    'Purple-Yellow': [288, 52, 52], // (288÷3) + 52 + 52 = 200
-                    'Purple-Green': [216, 48, 80],  // (216÷3) + 48 + 80 = 200
-                    'Purple-Blue': [120, 52, 108]   // (120÷3) + 52 + 108 = 200
+                    'Yellow-Red': [150, 50, 4],
+                    'Yellow-Orange': [225, 35, 4],
+                    'Yellow-Green': [225, 20, 7],
+                    'Yellow-Blue': [150, 20, 10],
+                    'Yellow-Purple': [150, 35, 7],
+
+                    'Green-Red': [125, 50, 5],
+                    'Green-Orange': [200, 35, 5],
+                    'Green-Yellow': [275, 20, 5],
+                    'Green-Blue': [125, 20, 11],
+                    'Green-Purple': [125, 35, 8],
+
+                    'Blue-Red': [100, 50, 6],
+                    'Blue-Orange': [175, 35, 6],
+                    'Blue-Yellow': [250, 20, 6],
+                    'Blue-Green': [175, 20, 9],
+                    'Blue-Purple': [100, 35, 9],
+
+                    'Purple-Red': [100, 55, 5],
+                    'Purple-Orange': [175, 40, 5],
+                    'Purple-Yellow': [250, 25, 5],
+                    'Purple-Green': [175, 25, 8],
+                    'Purple-Blue': [100, 25, 11]
                 };
                 
-                return statMap[this.id] || [80, 80, 80]; // Fallback for any missing characters
+                return statMap[this.id] || [12, 12, 12]; // Fallback
             }
 
             generateStats() {
@@ -2226,9 +2225,8 @@
                 const baseDamage = this.stats.attack;
                 const effectiveness = this.getEffectiveness(attackGene, defendingCharacter);
                 
-                // Since all stats are divisible by 4, and effectiveness is 0.5, 0.75, 1.0, 1.25, or 1.5
-                // The result will always be a whole number
-                return baseDamage * effectiveness;
+                // Truncate decimals by using Math.floor
+                return Math.floor(baseDamage * effectiveness);
             }
         }
 
@@ -2596,7 +2594,7 @@
             async processSingleAttack(attacker, attackGene, targetCharacter) {
                 const baseDamage = attacker.stats.attack;
                 const effectiveness = attacker.getEffectiveness(attackGene, targetCharacter);
-                const finalDamage = baseDamage * effectiveness;
+                const finalDamage = Math.floor(baseDamage * effectiveness);
                 
                 targetCharacter.hp = Math.max(0, targetCharacter.hp - finalDamage);
                 
@@ -2650,8 +2648,9 @@
                 for (const target of targets) {
                     const baseDamage = attacker.stats.attack;
                     const effectiveness = attacker.getEffectiveness(attackGene, target);
-                    const singleDamage = baseDamage * effectiveness;
-                    const splashDamage = singleDamage / 2;
+                    const singleDamage = Math.floor(baseDamage * effectiveness); // Add Math.floor here
+                    const splashDamage = Math.floor(singleDamage / 2); // Add Math.floor here too
+        
                     
                     target.hp = Math.max(0, target.hp - splashDamage);
                     
@@ -2746,7 +2745,7 @@
                         
                         for (const target of availableTargets) {
                             const effectiveness = attacker.getEffectiveness(attackObj.gene, target);
-                            const damage = (attacker.stats.attack * effectiveness) / 2; // Splash is half damage
+                            const damage = Math.floor((attacker.stats.attack * effectiveness) / 2); // Splash is half damage
                             totalDamage += damage;
                             
                             if (damage >= target.hp) {
@@ -2765,7 +2764,7 @@
                         // Calculate best target for single attacks
                         for (const target of availableTargets) {
                             const effectiveness = attackObj.gene === 'Neutral' ? 1 : attacker.getEffectiveness(attackObj.gene, target);
-                            const damage = attacker.stats.attack * effectiveness;
+                            const damage = Math.floor(attacker.stats.attack * effectiveness);
                             
                             // Scoring factors:
                             let score = damage; // Base score is damage dealt
