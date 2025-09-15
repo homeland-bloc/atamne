@@ -2569,6 +2569,7 @@
                 const attacker = this.getCurrentCharacter();
                 if (!attacker || attacker.hp <= 0) {
                     this.isProcessingTurn = false;
+                    this.attackButtonsDisabled = false; // Re-enable buttons
                     this.nextTurn();
                     return;
                 }
@@ -2582,11 +2583,14 @@
                 // Check for battle end
                 if (this.checkBattleEnd()) {
                     this.isProcessingTurn = false;
+                    this.attackButtonsDisabled = false; // Re-enable buttons
                     return;
                 }
                 
-                this.nextTurn();
+                // Reset flags before calling nextTurn
                 this.isProcessingTurn = false;
+                this.attackButtonsDisabled = false;
+                this.nextTurn();
             }
 
             async processSingleAttack(attacker, attackGene, targetCharacter) {
