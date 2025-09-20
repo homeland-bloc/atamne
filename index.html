@@ -1123,24 +1123,25 @@
         }
 
         /* Mobile battle log button and modal */
+            /* Replace existing mobile battle log styles with: */
             .battle-log-button {
                 display: none;
                 position: fixed;
-                bottom: 170px;
+                bottom: 200px;
                 right: 20px;
                 background: linear-gradient(45deg, #4ecdc4, #44a08d);
                 color: white;
                 border: none;
-                padding: 10px 15px;
+                padding: 12px 16px;
                 border-radius: 25px;
                 font-weight: bold;
                 cursor: pointer;
                 z-index: 999;
                 box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                font-size: 14px;
             }
 
             .battle-log-modal {
-                display: none;
                 position: fixed;
                 top: 0;
                 left: 0;
@@ -1148,23 +1149,25 @@
                 bottom: 0;
                 background: rgba(0, 0, 0, 0.8);
                 z-index: 2000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
             }
 
             .battle-log-modal.show {
                 display: flex;
-                align-items: center;
-                justify-content: center;
             }
 
             .battle-log-modal-content {
                 background: white;
                 border-radius: 20px;
                 padding: 20px;
-                margin: 20px;
-                max-width: 500px;
                 width: 100%;
+                max-width: 500px;
                 max-height: 80vh;
-                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
             }
 
             .battle-log-modal-header {
@@ -1184,6 +1187,19 @@
                 border-radius: 15px;
                 cursor: pointer;
                 font-weight: bold;
+            }
+
+            .battle-log-modal-content .battle-log {
+                display: block !important;
+                flex: 1;
+                overflow-y: auto;
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 15px;
+                font-size: 14px;
+                color: #666;
+                border: 1px solid #ddd;
+                margin: 0;
             }
 
             @media (max-width: 768px) {
@@ -1843,6 +1859,211 @@
         .battle-sprite.single-gene {
             background: linear-gradient(135deg, var(--gene-color), white) !important;
         }
+
+        .animation-speed-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #4ecdc4;
+            border-radius: 25px;
+            padding: 10px 15px;
+            display: none;
+            gap: 10px;
+            align-items: center;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .animation-speed-control.show {
+            display: flex;
+        }
+
+        .speed-btn {
+            background: #e0e0e0;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            font-size: 12px;
+        }
+
+        .speed-btn.active {
+            background: #4ecdc4;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .animation-speed-control {
+                top: 10px;
+                right: 10px;
+                padding: 8px 12px;
+            }
+            
+            .speed-btn {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+        }
+
+        .character-info-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .character-info-popup.show {
+            display: flex;
+        }
+
+        .character-info-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .info-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .info-character-display {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .info-character-sprite {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 0 auto 15px auto;
+            border: 3px solid #ddd;
+        }
+
+        .info-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-stat-card {
+            text-align: center;
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .info-stat-card.hp {
+            background: linear-gradient(135deg, #ffca28, #ffc107);
+        }
+
+        .info-stat-card.atk {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+        }
+
+        .info-stat-card.spd {
+            background: linear-gradient(135deg, #42a5f5, #90caf9);
+        }
+
+        .info-attacks {
+            margin-bottom: 20px;
+        }
+
+        .info-effectiveness {
+            font-size: 14px;
+        }
+
+        .effectiveness-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .effectiveness-cell {
+            text-align: center;
+            padding: 5px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .effectiveness-cell.super {
+            background: #66bb6a;
+            color: white;
+        }
+
+        .effectiveness-cell.effective {
+            background: #81c784;
+            color: white;
+        }
+
+        .effectiveness-cell.normal {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .effectiveness-cell.weak {
+            background: #ffab91;
+            color: #333;
+        }
+
+        .effectiveness-cell.very-weak {
+            background: #ff8a65;
+            color: white;
+        }
+
+        @media (max-width: 768px) {
+            .character-info-content {
+                margin: 10px;
+                padding: 20px;
+            }
+            
+            .info-stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .effectiveness-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -1854,6 +2075,13 @@
                 <button class="tab-button active" data-tab="breeding">🧬 Breeding Lab</button>
                 <button class="tab-button" data-tab="battle">⚔️ Battle Arena</button>
             </div>
+        </div>
+
+        <div class="animation-speed-control" id="animationSpeedControl">
+            <span style="font-size: 12px; color: #666; font-weight: bold;">Speed:</span>
+            <button class="speed-btn active" data-speed="1">1x</button>
+            <button class="speed-btn" data-speed="2">2x</button>
+            <button class="speed-btn" data-speed="4">4x</button>
         </div>
 
         <!-- BREEDING TAB -->
@@ -2042,6 +2270,42 @@
         <p style="margin-top: 10px; color: #999;">Master breeder achievement unlocked!</p>
     </div>
 
+    <div class="character-info-popup" id="characterInfoPopup">
+        <div class="character-info-content">
+            <button class="info-close-btn" id="infoCloseBtn">×</button>
+            <div class="info-character-display">
+                <div class="info-character-sprite" id="infoCharacterSprite"></div>
+                <h3 id="infoCharacterName">Character Name</h3>
+            </div>
+            
+            <div class="info-stats-grid">
+                <div class="info-stat-card hp">
+                    <div style="font-size: 24px; font-weight: bold;" id="infoHp">100</div>
+                    <div style="font-size: 12px;">❤️ Health</div>
+                </div>
+                <div class="info-stat-card atk">
+                    <div style="font-size: 24px; font-weight: bold;" id="infoAtk">50</div>
+                    <div style="font-size: 12px;">⚔️ Attack</div>
+                </div>
+                <div class="info-stat-card spd">
+                    <div style="font-size: 24px; font-weight: bold;" id="infoSpd">8</div>
+                    <div style="font-size: 12px;">⚡ Speed</div>
+                </div>
+            </div>
+            
+            <div class="info-attacks">
+                <h4>Available Attacks:</h4>
+                <div id="infoAttacksList"></div>
+            </div>
+            
+            <div class="info-effectiveness">
+                <h4>Type Effectiveness:</h4>
+                <p style="font-size: 12px; color: #666; margin-bottom: 10px;">When this character attacks:</p>
+                <div class="effectiveness-grid" id="infoEffectivenessGrid"></div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const GENES = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
         const GENE_COLORS = {
@@ -2110,64 +2374,58 @@
             }
 
             getStatDistribution() {
-                // New balanced stats system from stats viewer
-                // Formula: HP/5 + ATK + SPD×5 = 100
+                // New formula: HP/4 + ATK + SPD×4 = 80
                 const statMap = {
                     // Singles
-                    'Red': [100, 60, 4],
-                    'Orange': [200, 40, 4], 
-                    'Yellow': [300, 20, 4],
-                    'Green': [200, 20, 8],
-                    'Blue': [100, 20, 12],
-                    'Purple': [100, 40, 8],
+                    'Red': [64, 48, 4],
+                    'Orange': [128, 32, 4], 
+                    'Yellow': [192, 16, 4],
+                    'Green': [128, 16, 8],
+                    'Blue': [64, 16, 12],
+                    'Purple': [64, 32, 8],
                     
                     // Same-gene doubles
-                    'Red-Red': [125, 50, 5],
-                    'Orange-Orange': [175, 35, 6],
-                    'Yellow-Yellow': [250, 25, 5],
-                    'Green-Green': [175, 30, 7],
-                    'Blue-Blue': [125, 25, 10],
-                    'Purple-Purple': [150, 35, 7],
+                    'Red-Red': [80, 40, 5],
+                    'Orange-Orange': [112, 28, 6],
+                    'Yellow-Yellow': [160, 20, 5],
+                    'Green-Green': [112, 24, 7],
+                    'Blue-Blue': [80, 20, 10],
+                    'Purple-Purple': [96, 28, 7],
                     
                     // Different-gene doubles
-                    'Red-Orange': [175, 45, 4],
-                    'Red-Yellow': [250, 30, 4],
-                    'Red-Green': [175, 30, 7],
-                    'Red-Blue': [100, 30, 10],
-                    'Red-Purple': [100, 45, 7],
-
-                    'Orange-Red': [125, 55, 4],
-                    'Orange-Yellow': [275, 25, 4],
-                    'Orange-Green': [200, 25, 7],
-                    'Orange-Blue': [125, 25, 10],
-                    'Orange-Purple': [125, 40, 7],
-
-                    'Yellow-Red': [150, 50, 4],
-                    'Yellow-Orange': [225, 35, 4],
-                    'Yellow-Green': [225, 20, 7],
-                    'Yellow-Blue': [150, 20, 10],
-                    'Yellow-Purple': [150, 35, 7],
-
-                    'Green-Red': [125, 50, 5],
-                    'Green-Orange': [200, 35, 5],
-                    'Green-Yellow': [275, 20, 5],
-                    'Green-Blue': [125, 20, 11],
-                    'Green-Purple': [125, 35, 8],
-
-                    'Blue-Red': [100, 50, 6],
-                    'Blue-Orange': [175, 35, 6],
-                    'Blue-Yellow': [250, 20, 6],
-                    'Blue-Green': [175, 20, 9],
-                    'Blue-Purple': [100, 35, 9],
-
-                    'Purple-Red': [100, 55, 5],
-                    'Purple-Orange': [175, 40, 5],
-                    'Purple-Yellow': [250, 25, 5],
-                    'Purple-Green': [175, 25, 8],
-                    'Purple-Blue': [100, 25, 11]
+                    'Red-Orange': [112, 36, 4],
+                    'Red-Yellow': [160, 24, 4],
+                    'Red-Green': [112, 24, 7],
+                    'Red-Blue': [64, 24, 10],
+                    'Red-Purple': [64, 36, 7],
+                    'Orange-Red': [80, 44, 4],
+                    'Orange-Yellow': [176, 20, 4],
+                    'Orange-Green': [128, 20, 7],
+                    'Orange-Blue': [80, 20, 10],
+                    'Orange-Purple': [80, 32, 7],
+                    'Yellow-Red': [96, 40, 4],
+                    'Yellow-Orange': [144, 28, 4],
+                    'Yellow-Green': [144, 16, 7],
+                    'Yellow-Blue': [96, 16, 10],
+                    'Yellow-Purple': [96, 28, 7],
+                    'Green-Red': [80, 40, 5],
+                    'Green-Orange': [128, 28, 5],
+                    'Green-Yellow': [176, 16, 5],
+                    'Green-Blue': [80, 16, 11],
+                    'Green-Purple': [80, 28, 8],
+                    'Blue-Red': [64, 40, 6],
+                    'Blue-Orange': [112, 28, 6],
+                    'Blue-Yellow': [160, 16, 6],
+                    'Blue-Green': [112, 16, 9],
+                    'Blue-Purple': [64, 28, 9],
+                    'Purple-Red': [64, 44, 5],
+                    'Purple-Orange': [112, 32, 5],
+                    'Purple-Yellow': [160, 20, 5],
+                    'Purple-Green': [112, 20, 8],
+                    'Purple-Blue': [64, 20, 11]
                 };
                 
-                return statMap[this.id] || [12, 12, 12]; // Fallback
+                return statMap[this.id] || [64, 16, 4];
             }
 
             generateStats() {
@@ -2246,6 +2504,99 @@
                 this.ACTION_THRESHOLD = 1000; // Action bar threshold
                 this.isProcessingTurn = false; // Flag to prevent multiple attacks in one turn
                 this.attackButtonsDisabled = false; // Flag to disable attack buttons
+                this.animationSpeed = 1;
+                this.selectedAttackGenes = {}; // Changed from single to object
+                this.persistentAttackMode = false;
+            }
+
+            toggleAttackMode() {
+                this.persistentAttackMode = !this.persistentAttackMode;
+                if (!this.persistentAttackMode) {
+                    this.selectedAttackGenes = {}; // Clear all character selections
+                }
+                this.updateBattleControls();
+            }
+
+            showTargetSelectionDirectly(attackGene) {
+                const attackButtonsElement = document.getElementById('attackButtons');
+                const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
+                
+                const targetContainer = document.createElement('div');
+                targetContainer.style.display = 'flex';
+                targetContainer.style.gap = '8px';
+                targetContainer.style.justifyContent = 'center';
+                targetContainer.style.flexWrap = 'wrap';
+                targetContainer.style.width = '100%';
+                
+                availableTargets.forEach(target => {
+                    const button = document.createElement('button');
+                    button.className = 'attack-btn';
+                    
+                    if (target.genes.length === 1) {
+                        button.style.background = `linear-gradient(45deg, ${GENE_COLORS[target.genes[0]]}, ${GENE_LIGHT_COLORS[target.genes[0]]})`;
+                    } else if (target.genes[0] === target.genes[1]) {
+                        const geneColor = GENE_COLORS[target.genes[0]];
+                        const darkColor = GENE_DARK_COLORS[target.genes[0]];
+                        button.style.background = `linear-gradient(45deg, ${geneColor}, ${darkColor}, ${geneColor})`;
+                    } else {
+                        button.style.background = `linear-gradient(45deg, ${GENE_COLORS[target.genes[0]]}, ${GENE_COLORS[target.genes[1]]})`;
+                    }
+                    
+                    button.textContent = target.id;
+                    button.style.color = 'white';
+                    button.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)';
+                    button.style.minWidth = '120px';
+                    button.style.maxWidth = '140px';
+                    button.style.flex = '1 1 120px';
+                    
+                    button.addEventListener('click', async () => {
+                        if (this.isProcessingTurn) return;
+                        
+                        const allTargetButtons = targetContainer.querySelectorAll('button');
+                        allTargetButtons.forEach(btn => btn.disabled = true);
+                        
+                        await this.showAttackAnimation(this.getCurrentCharacter(), target);
+                        this.processTurn(attackGene, target);
+                    });
+                    
+                    targetContainer.appendChild(button);
+                });
+                
+                attackButtonsElement.appendChild(targetContainer);
+            }
+
+            setAnimationSpeed(speed) {
+                this.animationSpeed = speed;
+            }
+
+            // Update showAttackAnimation method:
+            showAttackAnimation(attacker, target) {
+                return new Promise(resolve => {
+                    const attackerElement = document.querySelector(`[data-battle-char="${attacker.id}"]`);
+                    const targetElement = document.querySelector(`[data-battle-char="${target.id}"]`);
+
+                    if (attackerElement) {
+                        attackerElement.style.boxShadow = '0 0 20px #ffeb3b';
+                        attackerElement.style.transform = 'scale(1.1)';
+                    }
+                    
+                    setTimeout(() => {
+                        if (targetElement) {
+                            targetElement.style.boxShadow = '0 0 20px #ff6b6b';
+                        }
+                        
+                        setTimeout(() => {
+                            if (attackerElement) {
+                                attackerElement.style.boxShadow = '';
+                                attackerElement.style.transform = '';
+                            }
+                            if (targetElement) {
+                                targetElement.style.boxShadow = '';
+                            }
+                            resolve();
+                        }, Math.floor(800 / this.animationSpeed));
+                    }, Math.floor(500 / this.animationSpeed));
+                });
             }
 
             setDifficulty(difficulty) {
@@ -2477,11 +2828,12 @@
                 this.updateBattleDisplay();
                 
                 const nextChar = this.getCurrentCharacter();
+                // In nextTurn method, replace the setTimeout:
                 if (nextChar && !nextChar.isPlayer) {
                     this.nextTurnTimer = setTimeout(() => {
-                    this.nextTurnTimer = null;
-                    this.processAITurn();
-                }, 2500);
+                        this.nextTurnTimer = null;
+                        this.processAITurn();
+                    }, Math.floor(2500 / this.animationSpeed));
                 } else if (nextChar && nextChar.isPlayer) {
                     // Re-enable attack buttons when it's the player's turn
                     this.attackButtonsDisabled = false;
@@ -2729,7 +3081,7 @@
                     }
                     
                     this.processTurn(selectedAttack, selectedTarget);
-                }, 2000); // 2 second delay
+                }, Math.floor(2000 / this.animationSpeed));
             }
 
             calculateBestMove(attacker, availableTargets) {
@@ -2833,15 +3185,17 @@
             }
 
             returnToSetup() {
-                // Clear all running timers first!
                 this.clearAllTimers();
                 
-                // Properly hide battle arena and show team setup
                 const teamSetup = document.getElementById('team-setup');
                 const battleArena = document.getElementById('battle-arena');
                 
                 if (teamSetup) teamSetup.style.display = 'block';
                 if (battleArena) battleArena.style.display = 'none';
+                
+                // Hide animation speed control
+                const speedControl = document.getElementById('animationSpeedControl');
+                if (speedControl) speedControl.classList.remove('show');
                 
                 // Reset battle log
                 this.battleLog = [];
@@ -2850,7 +3204,6 @@
                     logElement.innerHTML = '';
                 }
                 
-                // Also clear modal log on mobile
                 const modalLogElement = document.getElementById('battleLogModalContent');
                 if (modalLogElement) {
                     modalLogElement.innerHTML = '';
@@ -2955,10 +3308,11 @@
 
             addBattleLog(message, className = '') {
                 this.battleLog.push({ message, className });
-                if (this.battleLog.length > 10) {
+                if (this.battleLog.length > 15) { // Increased from 10 to 15
                     this.battleLog.shift();
                 }
                 
+                // Update desktop log
                 const logElement = document.getElementById('battleLog');
                 if (logElement) {
                     logElement.innerHTML = this.battleLog
@@ -2966,22 +3320,33 @@
                         .join('');
                     logElement.scrollTop = logElement.scrollHeight;
                 }
+                
+                // Update mobile modal log
+                const modalLogElement = document.getElementById('battleLogModalContent');
+                if (modalLogElement) {
+                    modalLogElement.innerHTML = this.battleLog
+                        .map(log => `<div class="log-entry ${log.className}">${log.message}</div>`)
+                        .join('');
+                    modalLogElement.scrollTop = modalLogElement.scrollHeight;
+                }
             }
 
             renderBattleArena() {
                 const teamSetup = document.getElementById('team-setup');
                 const battleArena = document.getElementById('battle-arena');
                 
-                // Ensure proper visibility states
                 if (teamSetup) teamSetup.style.display = 'none';
                 if (battleArena) battleArena.style.display = 'block';
                 
                 this.updateBattleDisplay();
                 
+                // Show animation speed control during battle
+                const speedControl = document.getElementById('animationSpeedControl');
+                if (speedControl) speedControl.classList.add('show');
+                
                 // Add quit button listener
                 const quitBtn = document.getElementById('quitBattleBtn');
                 if (quitBtn) {
-                    // Remove any existing listeners first
                     quitBtn.replaceWith(quitBtn.cloneNode(true));
                     const newQuitBtn = document.getElementById('quitBattleBtn');
                     newQuitBtn.addEventListener('click', () => this.showQuitConfirmation());
@@ -3090,56 +3455,108 @@
                 
                 activeNameElement.textContent = currentChar.id;
 
-                // Ensure quit button exists and has proper event listener
-                const quitBtn = document.getElementById('quitBattleBtn');
-
                 if (currentChar.isPlayer) {
                     controlsElement.style.display = 'block';
                     
-                    // Hide damage preview on mobile
                     const isMobile = window.innerWidth <= 768;
-                    if (isMobile) {
-                        attackButtonsElement.innerHTML = '<div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500;">Select an attack:</div>';
+                    const currentCharAttack = this.selectedAttackGenes[currentChar.id]; // Get THIS character's attack
+                    
+                    // Create attack mode toggle
+                    const attackModeToggle = `
+                        <div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                            <label style="font-size: 14px; color: #666; cursor: pointer;">
+                                <input type="checkbox" id="persistentAttackToggle" ${this.persistentAttackMode ? 'checked' : ''}> 
+                                Remember Attack Choice
+                            </label>
+                        </div>
+                    `;
+                    
+                    if (this.persistentAttackMode && currentCharAttack) {
+                        // Show current selected attack for THIS character and target selection
+                        attackButtonsElement.innerHTML = attackModeToggle + `
+                            <div style="margin-bottom: 15px; text-align: center;">
+                                <div style="color: #666; margin-bottom: 10px;">${currentChar.id}'s Attack: <strong>${currentCharAttack.gene}${currentCharAttack.type === 'splash' ? ' Splash' : ''}</strong></div>
+                                <button class="cancel-btn" id="changeAttackBtn" style="padding: 5px 15px; font-size: 12px;">Change</button>
+                            </div>
+                            <div style="margin-bottom: 15px; color: #666; font-weight: bold; text-align: center;">Select a target:</div>
+                        `;
+                        
+                        // Add change attack listener
+                        document.getElementById('changeAttackBtn').addEventListener('click', () => {
+                            delete this.selectedAttackGenes[currentChar.id]; // Remove THIS character's selection
+                            this.updateBattleControls();
+                        });
+                        
+                        // Handle splash attacks
+                        if (currentCharAttack.type === 'splash') {
+                            const splashButton = document.createElement('button');
+                            splashButton.className = 'attack-btn';
+                            splashButton.textContent = `Use ${currentCharAttack.gene} Splash`;
+                            splashButton.style.background = `linear-gradient(45deg, ${GENE_DARK_COLORS[currentCharAttack.gene]}, ${GENE_COLORS[currentCharAttack.gene]})`;
+                            splashButton.addEventListener('click', () => {
+                                if (this.isProcessingTurn) return;
+                                this.processTurn(currentCharAttack, null);
+                            });
+                            attackButtonsElement.appendChild(splashButton);
+                        } else {
+                            this.showTargetSelectionDirectly(currentCharAttack);
+                        }
                     } else {
-                        attackButtonsElement.innerHTML = '<div style="margin-bottom: 15px; color: #666;">Select an attack:</div>';
+                        // Show attack selection
+                        attackButtonsElement.innerHTML = attackModeToggle + 
+                            '<div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500;">Select an attack:</div>';
+                        
+                        const attackObjs = currentChar.getAttackGenes();
+                        const buttonContainer = document.createElement('div');
+                        buttonContainer.style.display = 'flex';
+                        buttonContainer.style.gap = isMobile ? '12px' : '15px';
+                        buttonContainer.style.justifyContent = 'center';
+                        buttonContainer.style.flexWrap = 'wrap';
+                        
+                        attackObjs.forEach((attackObj) => {
+                            const button = document.createElement('button');
+                            button.className = 'attack-btn';
+                            
+                            if (this.attackButtonsDisabled) {
+                                button.disabled = true;
+                            }
+                            
+                            if (attackObj.type === 'splash') {
+                                button.textContent = `${attackObj.gene} Splash ⇶`;
+                                button.style.setProperty('--attack-color', GENE_DARK_COLORS[attackObj.gene]);
+                                button.style.setProperty('--attack-color-light', GENE_COLORS[attackObj.gene]);
+                            } else {
+                                button.textContent = attackObj.gene;
+                                if (attackObj.gene !== 'Neutral') {
+                                    button.style.setProperty('--attack-color', GENE_COLORS[attackObj.gene]);
+                                    button.style.setProperty('--attack-color-light', GENE_LIGHT_COLORS[attackObj.gene]);
+                                } else {
+                                    button.style.setProperty('--attack-color', '#999');
+                                    button.style.setProperty('--attack-color-light', '#bbb');
+                                }
+                            }
+                            
+                            button.addEventListener('click', () => {
+                                if (this.persistentAttackMode) {
+                                    this.selectedAttackGenes[currentChar.id] = attackObj; // Save for THIS character
+                                    this.updateBattleControls();
+                                } else {
+                                    this.selectAttackGene(attackObj);
+                                }
+                            });
+                            buttonContainer.appendChild(button);
+                        });
+
+                        attackButtonsElement.appendChild(buttonContainer);
                     }
                     
-                    const attackObjs = currentChar.getAttackGenes();
-                    const buttonContainer = document.createElement('div');
-                    buttonContainer.style.display = 'flex';
-                    buttonContainer.style.gap = isMobile ? '12px' : '15px';
-                    buttonContainer.style.justifyContent = 'center';
-                    buttonContainer.style.flexWrap = 'wrap';
-                    
-                    attackObjs.forEach((attackObj, index) => {
-                        const button = document.createElement('button');
-                        button.className = 'attack-btn';
-                        
-                        // Disable button if attack buttons are disabled
-                        if (this.attackButtonsDisabled) {
-                            button.disabled = true;
-                        }
-                        
-                        if (attackObj.type === 'splash') {
-                            button.textContent = `${attackObj.gene} Splash ⇶`;
-                            button.style.setProperty('--attack-color', GENE_DARK_COLORS[attackObj.gene]);
-                            button.style.setProperty('--attack-color-light', GENE_COLORS[attackObj.gene]);
-                        } else {
-                            button.textContent = attackObj.gene;
-                            if (attackObj.gene !== 'Neutral') {
-                                button.style.setProperty('--attack-color', GENE_COLORS[attackObj.gene]);
-                                button.style.setProperty('--attack-color-light', GENE_LIGHT_COLORS[attackObj.gene]);
-                            } else {
-                                button.style.setProperty('--attack-color', '#999');
-                                button.style.setProperty('--attack-color-light', '#bbb');
-                            }
-                        }
-                        
-                        button.addEventListener('click', () => this.selectAttackGene(attackObj));
-                        buttonContainer.appendChild(button);
-                    });
-
-                    attackButtonsElement.appendChild(buttonContainer);
+                    // Add toggle listener
+                    const toggleCheckbox = document.getElementById('persistentAttackToggle');
+                    if (toggleCheckbox) {
+                        toggleCheckbox.addEventListener('change', () => {
+                            this.toggleAttackMode();
+                        });
+                    }
                 } else {
                     controlsElement.style.display = 'block';
                     attackButtonsElement.innerHTML = '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
@@ -3258,6 +3675,99 @@
                 this.selectedBattleTeam = [];
                 this.battleSystem = new BattleSystem(this);
                 this.init();
+            }
+
+            showCharacterInfo(characterId) {
+                const character = this.characters[characterId];
+                if (!character || !character.unlocked) return;
+                
+                const popup = document.getElementById('characterInfoPopup');
+                const sprite = document.getElementById('infoCharacterSprite');
+                const name = document.getElementById('infoCharacterName');
+                const hp = document.getElementById('infoHp');
+                const atk = document.getElementById('infoAtk');
+                const spd = document.getElementById('infoSpd');
+                const attacksList = document.getElementById('infoAttacksList');
+                const effectivenessGrid = document.getElementById('infoEffectivenessGrid');
+                
+                // Update character sprite
+                this.updateCharacterSprite(sprite, character);
+                
+                // Update info
+                name.textContent = character.id;
+                hp.textContent = character.stats.hp;
+                atk.textContent = character.stats.attack;
+                spd.textContent = character.stats.speed;
+                
+                // Update attacks
+                const attacks = character.getAttackGenes();
+                attacksList.innerHTML = attacks.map(attack => 
+                    `<div style="margin-bottom: 8px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
+                        <strong>${attack.gene}${attack.type === 'splash' ? ' Splash' : ''}</strong>
+                        ${attack.type === 'splash' ? ' (hits all enemies for 50% damage)' : ' (single target)'}
+                    </div>`
+                ).join('');
+                
+                // Update effectiveness grid
+                const genes = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+                effectivenessGrid.innerHTML = genes.map(defendGene => {
+                    const effectiveness = character.getEffectiveness(character.genes[0], {genes: [defendGene]});
+                    let className = 'normal';
+                    let text = '1.0×';
+                    
+                    if (effectiveness === 1.5) { className = 'super'; text = '1.5×'; }
+                    else if (effectiveness === 1.25) { className = 'effective'; text = '1.25×'; }
+                    else if (effectiveness === 0.75) { className = 'weak'; text = '0.75×'; }
+                    else if (effectiveness === 0.5) { className = 'very-weak'; text = '0.5×'; }
+                    
+                    return `<div class="effectiveness-cell ${className}">
+                        ${GENE_SYMBOLS[defendGene]}<br>${text}
+                    </div>`;
+                }).join('');
+                
+                popup.classList.add('show');
+            }
+
+            setupCharacterDoubleClick() {
+                // For breeding table
+                document.addEventListener('dblclick', (e) => {
+                    const slot = e.target.closest('.character-slot');
+                    if (slot && slot.dataset.characterId) {
+                        const character = this.characters[slot.dataset.characterId];
+                        if (character && character.unlocked) {
+                            this.showCharacterInfo(slot.dataset.characterId);
+                        }
+                    }
+                    
+                    // For battle character selection
+                    const selectionSlot = e.target.closest('.selection-slot');
+                    if (selectionSlot) {
+                        const sprite = selectionSlot.querySelector('.character-sprite');
+                        if (sprite) {
+                            // Find character by sprite comparison
+                            const unlockedChars = Object.values(this.characters).filter(char => char.unlocked);
+                            for (const char of unlockedChars) {
+                                const testSprite = document.createElement('div');
+                                this.updateCharacterSprite(testSprite, char);
+                                if (sprite.innerHTML === testSprite.innerHTML) {
+                                    this.showCharacterInfo(char.id);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                // Close popup listeners
+                document.getElementById('infoCloseBtn').addEventListener('click', () => {
+                    document.getElementById('characterInfoPopup').classList.remove('show');
+                });
+                
+                document.getElementById('characterInfoPopup').addEventListener('click', (e) => {
+                    if (e.target.id === 'characterInfoPopup') {
+                        document.getElementById('characterInfoPopup').classList.remove('show');
+                    }
+                });
             }
 
             unlockAllCharacters() {
@@ -3861,17 +4371,23 @@
                     });
                 });
 
-                // Battle log modal for mobile
+                // Battle log modal for mobile - REPLACE EXISTING SECTION
                 const battleLogButton = document.getElementById('battleLogButton');
                 const battleLogModal = document.getElementById('battleLogModal');
                 const battleLogModalClose = document.getElementById('battleLogModalClose');
 
                 if (battleLogButton) {
-                    battleLogButton.addEventListener('click', () => {
+                    battleLogButton.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         battleLogModal.classList.add('show');
-                        // Copy battle log content to modal
+                        // Sync the modal content with current battle log
+                        const currentLog = document.getElementById('battleLog').innerHTML;
                         const modalContent = document.getElementById('battleLogModalContent');
-                        modalContent.innerHTML = document.getElementById('battleLog').innerHTML;
+                        if (modalContent) {
+                            modalContent.innerHTML = currentLog;
+                            modalContent.scrollTop = modalContent.scrollHeight;
+                        }
                     });
                 }
 
