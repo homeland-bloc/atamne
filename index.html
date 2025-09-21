@@ -1122,25 +1122,6 @@
             margin-top: 15px;
         }
 
-        /* Mobile battle log button and modal */
-            /* Replace existing mobile battle log styles with: */
-            .battle-log-button {
-                display: none;
-                position: fixed;
-                bottom: 200px;
-                right: 20px;
-                background: linear-gradient(45deg, #4ecdc4, #44a08d);
-                color: white;
-                border: none;
-                padding: 12px 16px;
-                border-radius: 25px;
-                font-weight: bold;
-                cursor: pointer;
-                z-index: 999;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-                font-size: 14px;
-            }
-
             .battle-log-modal {
                 position: fixed;
                 top: 0;
@@ -1165,7 +1146,7 @@
                 padding: 20px;
                 width: 100%;
                 max-width: 500px;
-                max-height: 80vh;
+                max-height: 85vh;
                 display: flex;
                 flex-direction: column;
             }
@@ -1200,6 +1181,7 @@
                 color: #666;
                 border: 1px solid #ddd;
                 margin: 0;
+                min-height: 400px;
             }
 
             @media (max-width: 768px) {
@@ -1507,16 +1489,16 @@
             .battle-controls {
                 padding: 15px !important;
                 position: fixed !important;
-                bottom: 20px !important;  /* Changed from max(30px, env(...)) */
+                bottom: 20px !important;
                 left: 10px !important;
                 right: 10px !important;
                 background: rgba(255, 255, 255, 0.98) !important;
                 border-radius: 20px !important;
-                max-height: 200px !important; /* Increased height */
+                max-height: 450px !important; /* Increased from 300px by 1.5x */
                 overflow-y: auto !important;
                 z-index: 1000 !important;
                 box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
-                margin-bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important; /* Support safe area */
+                margin-bottom: max(30px, env(safe-area-inset-bottom, 30px)) !important;
             }
             
             /* Larger controls header */
@@ -1527,16 +1509,35 @@
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                gap: 10px;
             }
             
-            /* Larger quit button */
-            #quitBattleBtn {
+            /* Style both quit and log buttons similarly */
+            #quitBattleBtn, #battleLogButton {
                 padding: 8px 12px !important;
                 font-size: 12px !important;
                 min-width: auto !important;
                 border-radius: 12px !important;
+                white-space: nowrap;
             }
-            
+
+            .battle-log-button {
+                display: inline-block !important;
+                position: static !important;
+                background: linear-gradient(45deg, #4ecdc4, #44a08d) !important;
+                color: white !important;
+                border: none !important;
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                min-width: auto !important;
+                border-radius: 12px !important;
+                font-weight: bold !important;
+                cursor: pointer !important;
+                box-shadow: none !important;
+                margin: 0 0 0 8px !important;
+                white-space: nowrap !important;
+            }
+                        
             /* "Select an attack:" text */
             .attack-buttons > div:first-child {
                 font-size: 15px !important;
@@ -2064,6 +2065,122 @@
                 grid-template-columns: repeat(3, 1fr);
             }
         }
+
+        /* Fix attack button container alignment */
+        #attackRow, #targetRow {
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
+            flex-wrap: wrap !important;
+            width: 100% !important;
+            margin: 0 auto !important;
+        }
+
+        #attackRow .attack-btn, #targetRow .attack-btn {
+            flex: 0 1 auto !important;
+            min-width: 120px !important;
+            max-width: 150px !important;
+            margin: 4px !important;
+        }
+
+        @media (max-width: 768px) {
+            #attackRow .attack-btn, #targetRow .attack-btn {
+                min-width: 100px !important;
+                max-width: 130px !important;
+                margin: 2px !important;
+            }
+        }
+
+        /* Enhanced glow effect for selected attack buttons */
+        .attack-btn.selected-attack {
+            box-shadow: 0 0 20px var(--attack-color), 0 0 40px var(--attack-color) !important;
+            transform: scale(1.08) !important;
+            border: 3px solid var(--attack-color) !important;
+            filter: brightness(1.1) !important;
+            z-index: 10 !important;
+            position: relative !important;
+        }
+
+        .attack-btn.selected-attack::before {
+            content: '';
+            position: absolute;
+            top: -5px;
+            left: -5px;
+            right: -5px;
+            bottom: -5px;
+            background: var(--attack-color);
+            opacity: 0.3;
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(10px);
+        }
+
+        /* Fix attack button container alignment - use specific selectors to avoid conflicts */
+        .battle-controls #attackRow, 
+        .battle-controls #targetRow {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 100%;
+            margin: 0 auto;
+            gap: 8px;
+        }
+
+        .battle-controls #attackRow .attack-btn, 
+        .battle-controls #targetRow .attack-btn {
+            flex: 0 1 auto;
+            min-width: min(120px, calc(50vw - 20px));
+            max-width: 150px;
+            margin: 2px;
+        }
+
+        /* Enhanced glow effect for selected attack buttons with fallbacks */
+        .attack-btn.selected-attack {
+            box-shadow: 
+                0 0 20px var(--attack-color, #4ecdc4), 
+                0 0 40px var(--attack-color, #4ecdc4),
+                0 0 60px var(--attack-color, #4ecdc4) !important;
+            transform: scale(1.05) !important;
+            border: 3px solid var(--attack-color, #4ecdc4) !important;
+            filter: brightness(1.1) !important;
+            position: relative !important;
+            z-index: 5 !important;
+        }
+
+        .attack-btn.selected-attack::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: var(--attack-color, #4ecdc4);
+            opacity: 0.2;
+            border-radius: inherit;
+            z-index: -1;
+            filter: blur(8px);
+        }
+
+        /* Ensure attack buttons don't interfere with higher z-index elements */
+        .battle-controls {
+            z-index: 1000 !important;
+        }
+
+        @media (max-width: 768px) {
+            .battle-controls #attackRow, 
+            .battle-controls #targetRow {
+                gap: 6px;
+            }
+            
+            .battle-controls #attackRow .attack-btn, 
+            .battle-controls #targetRow .attack-btn {
+                min-width: min(100px, calc(33vw - 10px));
+                max-width: 130px;
+                font-size: 12px;
+                padding: 10px 8px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2233,16 +2350,15 @@
                     <div class="battle-log" id="battleLog"></div>
                 </div>
 
-                <button class="battle-log-button" id="battleLogButton">📜 Logs</button>
-                    <div class="battle-log-modal" id="battleLogModal">
-                        <div class="battle-log-modal-content">
-                            <div class="battle-log-modal-header">
-                                <h3 style="margin: 0; color: #666;">Battle Log</h3>
-                                <button class="battle-log-modal-close" id="battleLogModalClose">✕ Close</button>
-                            </div>
-                            <div class="battle-log" id="battleLogModalContent"></div>
+                <div class="battle-log-modal" id="battleLogModal">
+                    <div class="battle-log-modal-content">
+                        <div class="battle-log-modal-header">
+                            <h3 style="margin: 0; color: #666;">Battle Log</h3>
+                            <button class="battle-log-modal-close" id="battleLogModalClose">✕ Close</button>
                         </div>
+                        <div class="battle-log" id="battleLogModalContent"></div>
                     </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2507,14 +2623,7 @@
                 this.animationSpeed = 1;
                 this.selectedAttackGenes = {}; // Changed from single to object
                 this.persistentAttackMode = false;
-            }
-
-            toggleAttackMode() {
-                this.persistentAttackMode = !this.persistentAttackMode;
-                if (!this.persistentAttackMode) {
-                    this.selectedAttackGenes = {}; // Clear all character selections
-                }
-                this.updateBattleControls();
+                this.battleControlsInitialized = false;
             }
 
             showTargetSelectionDirectly(attackGene) {
@@ -2569,7 +2678,6 @@
                 this.animationSpeed = speed;
             }
 
-            // Update showAttackAnimation method:
             showAttackAnimation(attacker, target) {
                 return new Promise(resolve => {
                     const attackerElement = document.querySelector(`[data-battle-char="${attacker.id}"]`);
@@ -3001,7 +3109,7 @@
                     const baseDamage = attacker.stats.attack;
                     const effectiveness = attacker.getEffectiveness(attackGene, target);
                     const singleDamage = Math.floor(baseDamage * effectiveness); // Add Math.floor here
-                    const splashDamage = Math.floor(singleDamage / 2); // Add Math.floor here too
+                    const splashDamage = Math.floor(singleDamage / 2);
         
                     
                     target.hp = Math.max(0, target.hp - splashDamage);
@@ -3185,6 +3293,7 @@
             }
 
             returnToSetup() {
+                this.battleControlsInitialized = false;
                 this.clearAllTimers();
                 
                 const teamSetup = document.getElementById('team-setup');
@@ -3218,38 +3327,6 @@
                 this.game.battleSystem = new BattleSystem(this.game);
                 this.game.selectedBattleTeam = [];
                 this.game.updateBattleTeamSelection();
-            }
-
-            showAttackAnimation(attacker, target) {
-                return new Promise(resolve => {
-                    // Highlight attacker
-                    const attackerElement = document.querySelector(`[data-battle-char="${attacker.id}"]`);
-                    const targetElement = document.querySelector(`[data-battle-char="${target.id}"]`);
-        
-                    if (attackerElement) {
-                        attackerElement.style.boxShadow = '0 0 20px #ffeb3b';
-                        attackerElement.style.transform = 'scale(1.1)';
-                    }
-                    
-                    setTimeout(() => {
-                        // Highlight target
-                        if (targetElement) {
-                            targetElement.style.boxShadow = '0 0 20px #ff6b6b';
-                        }
-                        
-                        setTimeout(() => {
-                            // Reset styles
-                            if (attackerElement) {
-                                attackerElement.style.boxShadow = '';
-                                attackerElement.style.transform = '';
-                            }
-                            if (targetElement) {
-                                targetElement.style.boxShadow = '';
-                            }
-                            resolve();
-                        }, 800);
-                    }, 500);
-                });
             }
 
             showDamageAnimation(targetCharacter, damage, effectiveness) {
@@ -3455,112 +3532,175 @@
                 
                 activeNameElement.textContent = currentChar.id;
 
-                if (currentChar.isPlayer) {
-                    controlsElement.style.display = 'block';
-                    
-                    const isMobile = window.innerWidth <= 768;
-                    const currentCharAttack = this.selectedAttackGenes[currentChar.id]; // Get THIS character's attack
-                    
-                    // Create attack mode toggle
-                    const attackModeToggle = `
-                        <div style="margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 10px;">
-                            <label style="font-size: 14px; color: #666; cursor: pointer;">
-                                <input type="checkbox" id="persistentAttackToggle" ${this.persistentAttackMode ? 'checked' : ''}> 
-                                Remember Attack Choice
-                            </label>
+                // Create header HTML once
+                const headerHtml = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <div style="font-weight: bold; color: #666;">
+                            ${currentChar.id}'s Turn
                         </div>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="battle-log-button" id="battleLogButton">📜 Logs</button>
+                            <button class="cancel-btn" id="quitBattleBtn" style="padding: 8px 12px; font-size: 12px;">Quit</button>
+                        </div>
+                    </div>
+                `;
+
+                // Set header once for both player and enemy
+                attackButtonsElement.innerHTML = headerHtml;
+
+                // Add event listeners only if they don't exist
+                if (!this.battleControlsInitialized) {
+                    this.battleControlsInitialized = true;
+                    
+                    // Use event delegation to avoid recreating listeners
+                    attackButtonsElement.addEventListener('click', (e) => {
+                        if (e.target.id === 'battleLogButton') {
+                            const battleLogModal = document.getElementById('battleLogModal');
+                            if (battleLogModal) {
+                                battleLogModal.classList.add('show');
+                                const currentLog = document.getElementById('battleLog').innerHTML;
+                                const modalContent = document.getElementById('battleLogModalContent');
+                                if (modalContent) {
+                                    modalContent.innerHTML = currentLog;
+                                    modalContent.scrollTop = modalContent.scrollHeight;
+                                }
+                            }
+                        } else if (e.target.id === 'quitBattleBtn') {
+                            this.showQuitConfirmation();
+                        }
+                    });
+                }
+
+                controlsElement.style.display = 'block';
+
+                if (currentChar.isPlayer) {
+                    const isMobile = window.innerWidth <= 768;
+                    const currentCharAttack = this.selectedAttackGenes[currentChar.id];
+                    
+                    // Add player interface after header
+                    attackButtonsElement.innerHTML += `
+                        <div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500; text-align: center;">Select an attack:</div>
+                        <div id="attackRow" style="display: flex; gap: ${isMobile ? '8px' : '12px'}; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;"></div>
+                        <div style="margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500; text-align: center;">Select a target:</div>
+                        <div id="targetRow" style="display: flex; gap: ${isMobile ? '6px' : '8px'}; justify-content: center; flex-wrap: wrap;"></div>
                     `;
                     
-                    if (this.persistentAttackMode && currentCharAttack) {
-                        // Show current selected attack for THIS character and target selection
-                        attackButtonsElement.innerHTML = attackModeToggle + `
-                            <div style="margin-bottom: 15px; text-align: center;">
-                                <div style="color: #666; margin-bottom: 10px;">${currentChar.id}'s Attack: <strong>${currentCharAttack.gene}${currentCharAttack.type === 'splash' ? ' Splash' : ''}</strong></div>
-                                <button class="cancel-btn" id="changeAttackBtn" style="padding: 5px 15px; font-size: 12px;">Change</button>
-                            </div>
-                            <div style="margin-bottom: 15px; color: #666; font-weight: bold; text-align: center;">Select a target:</div>
-                        `;
-                        
-                        // Add change attack listener
-                        document.getElementById('changeAttackBtn').addEventListener('click', () => {
-                            delete this.selectedAttackGenes[currentChar.id]; // Remove THIS character's selection
-                            this.updateBattleControls();
-                        });
-                        
-                        // Handle splash attacks
-                        if (currentCharAttack.type === 'splash') {
-                            const splashButton = document.createElement('button');
-                            splashButton.className = 'attack-btn';
-                            splashButton.textContent = `Use ${currentCharAttack.gene} Splash`;
-                            splashButton.style.background = `linear-gradient(45deg, ${GENE_DARK_COLORS[currentCharAttack.gene]}, ${GENE_COLORS[currentCharAttack.gene]})`;
-                            splashButton.addEventListener('click', () => {
-                                if (this.isProcessingTurn) return;
-                                this.processTurn(currentCharAttack, null);
-                            });
-                            attackButtonsElement.appendChild(splashButton);
-                        } else {
-                            this.showTargetSelectionDirectly(currentCharAttack);
-                        }
-                    } else {
-                        // Show attack selection
-                        attackButtonsElement.innerHTML = attackModeToggle + 
-                            '<div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500;">Select an attack:</div>';
-                        
-                        const attackObjs = currentChar.getAttackGenes();
-                        const buttonContainer = document.createElement('div');
-                        buttonContainer.style.display = 'flex';
-                        buttonContainer.style.gap = isMobile ? '12px' : '15px';
-                        buttonContainer.style.justifyContent = 'center';
-                        buttonContainer.style.flexWrap = 'wrap';
-                        
-                        attackObjs.forEach((attackObj) => {
-                            const button = document.createElement('button');
-                            button.className = 'attack-btn';
-                            
-                            if (this.attackButtonsDisabled) {
-                                button.disabled = true;
-                            }
-                            
-                            if (attackObj.type === 'splash') {
-                                button.textContent = `${attackObj.gene} Splash ⇶`;
-                                button.style.setProperty('--attack-color', GENE_DARK_COLORS[attackObj.gene]);
-                                button.style.setProperty('--attack-color-light', GENE_COLORS[attackObj.gene]);
-                            } else {
-                                button.textContent = attackObj.gene;
-                                if (attackObj.gene !== 'Neutral') {
-                                    button.style.setProperty('--attack-color', GENE_COLORS[attackObj.gene]);
-                                    button.style.setProperty('--attack-color-light', GENE_LIGHT_COLORS[attackObj.gene]);
-                                } else {
-                                    button.style.setProperty('--attack-color', '#999');
-                                    button.style.setProperty('--attack-color-light', '#bbb');
-                                }
-                            }
-                            
-                            button.addEventListener('click', () => {
-                                if (this.persistentAttackMode) {
-                                    this.selectedAttackGenes[currentChar.id] = attackObj; // Save for THIS character
-                                    this.updateBattleControls();
-                                } else {
-                                    this.selectAttackGene(attackObj);
-                                }
-                            });
-                            buttonContainer.appendChild(button);
-                        });
-
-                        attackButtonsElement.appendChild(buttonContainer);
-                    }
+                    const attackRow = document.getElementById('attackRow');
+                    const targetRow = document.getElementById('targetRow');
                     
-                    // Add toggle listener
-                    const toggleCheckbox = document.getElementById('persistentAttackToggle');
-                    if (toggleCheckbox) {
-                        toggleCheckbox.addEventListener('change', () => {
-                            this.toggleAttackMode();
+                    // Row 1: Attack buttons (radio style)
+                    const attackObjs = currentChar.getAttackGenes();
+                    attackObjs.forEach((attackObj) => {
+                        const button = document.createElement('button');
+                        button.className = 'attack-btn';
+                        
+                        // Handle selection highlighting with proper cleanup
+                        const isSelected = currentCharAttack && 
+                            currentCharAttack.gene === attackObj.gene && 
+                            currentCharAttack.type === attackObj.type;
+                        
+                        if (isSelected) {
+                            button.classList.add('selected-attack');
+                        }
+                        
+                        if (this.attackButtonsDisabled) {
+                            button.disabled = true;
+                        }
+                        
+                        if (attackObj.type === 'splash') {
+                            button.textContent = `${attackObj.gene} Splash ⇶`;
+                            button.style.setProperty('--attack-color', GENE_DARK_COLORS[attackObj.gene]);
+                            button.style.setProperty('--attack-color-light', GENE_COLORS[attackObj.gene]);
+                        } else {
+                            button.textContent = attackObj.gene;
+                            if (attackObj.gene !== 'Neutral') {
+                                button.style.setProperty('--attack-color', GENE_COLORS[attackObj.gene]);
+                                button.style.setProperty('--attack-color-light', GENE_LIGHT_COLORS[attackObj.gene]);
+                            } else {
+                                button.style.setProperty('--attack-color', '#999');
+                                button.style.setProperty('--attack-color-light', '#bbb');
+                            }
+                        }
+                        
+                        button.addEventListener('click', () => {
+                            this.selectedAttackGenes[currentChar.id] = attackObj;
+                            this.updateBattleControls(); // Refresh to show selection and targets
                         });
+                        attackRow.appendChild(button);
+                    });
+                    
+                    // Row 2: Target buttons (only if attack selected)
+                    if (currentCharAttack) {
+                        if (currentCharAttack.type === 'splash') {
+                            const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
+                            
+                            if (availableTargets.length === 0) return; // Safety check
+                            
+                            availableTargets.forEach(target => {
+                                const button = this.createTargetButton(target, isMobile, true, currentCharAttack);
+                                
+                                button.addEventListener('click', async () => {
+                                    if (this.isProcessingTurn) return;
+                                    
+                                    // Disable all target buttons
+                                    targetRow.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                                    
+                                    // Execute splash attack regardless of which target was clicked
+                                    this.processTurn(currentCharAttack, null);
+                                });
+                                
+                                targetRow.appendChild(button);
+                            });
+                        } else {
+                            const availableTargets = this.enemyTeam.filter(char => char.hp > 0);
+                            availableTargets.forEach(target => {
+                                const button = this.createTargetButton(target, isMobile, false, currentCharAttack);
+                                
+                                button.addEventListener('click', async () => {
+                                    if (this.isProcessingTurn) return;
+                                    
+                                    const allTargetButtons = targetRow.querySelectorAll('button');
+                                    allTargetButtons.forEach(btn => btn.disabled = true);
+                                    
+                                    await this.showAttackAnimation(this.getCurrentCharacter(), target);
+                                    this.processTurn(currentCharAttack, target);
+                                });
+                                
+                                targetRow.appendChild(button);
+                            });
+                        }
                     }
                 } else {
-                    controlsElement.style.display = 'block';
-                    attackButtonsElement.innerHTML = '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
+                    attackButtonsElement.innerHTML += '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
                 }
+            }
+
+            createTargetButton(target, isMobile, isSplash = false, attackObj = null) {
+                const button = document.createElement('button');
+                button.className = 'attack-btn';
+                
+                // Set button appearance based on target genes
+                if (target.genes.length === 1) {
+                    button.style.background = `linear-gradient(45deg, ${GENE_COLORS[target.genes[0]]}, ${GENE_LIGHT_COLORS[target.genes[0]]})`;
+                } else if (target.genes[0] === target.genes[1]) {
+                    const geneColor = GENE_COLORS[target.genes[0]];
+                    const darkColor = GENE_DARK_COLORS[target.genes[0]];
+                    button.style.background = `linear-gradient(45deg, ${geneColor}, ${darkColor}, ${geneColor})`;
+                } else {
+                    button.style.background = `linear-gradient(45deg, ${GENE_COLORS[target.genes[0]]}, ${GENE_COLORS[target.genes[1]]})`;
+                }
+                
+                button.textContent = target.id + (isSplash ? ' (Splash)' : '');
+                button.style.color = 'white';
+                button.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)';
+                
+                // Responsive sizing
+                if (isMobile) {
+                    button.style.fontSize = '12px';
+                    button.style.padding = '10px 8px';
+                }
+                
+                return button;
             }
 
             selectAttackGene(attackObj) {
@@ -3699,31 +3839,48 @@
                 atk.textContent = character.stats.attack;
                 spd.textContent = character.stats.speed;
                 
-                // Update attacks
+                // Update attacks with individual effectiveness
                 const attacks = character.getAttackGenes();
-                attacksList.innerHTML = attacks.map(attack => 
-                    `<div style="margin-bottom: 8px; padding: 8px; background: #f0f0f0; border-radius: 8px;">
+                attacksList.innerHTML = attacks.map(attack => {
+                    let effectivenessHtml = '';
+                    
+                    if (attack.gene !== 'Neutral') {
+                        const genes = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+                        effectivenessHtml = `
+                            <div style="margin-top: 8px; font-size: 11px;">
+                                <div style="margin-bottom: 4px; font-weight: bold;">vs:</div>
+                                <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px;">
+                                    ${genes.map(defendGene => {
+                                        const effectiveness = character.getEffectiveness(attack.gene, {genes: [defendGene]});
+                                        let className = 'normal';
+                                        let text = '1.0×';
+                                        
+                                        if (effectiveness === 1.5) { className = 'super'; text = '1.5×'; }
+                                        else if (effectiveness === 1.25) { className = 'effective'; text = '1.25×'; }
+                                        else if (effectiveness === 0.75) { className = 'weak'; text = '0.75×'; }
+                                        else if (effectiveness === 0.5) { className = 'very-weak'; text = '0.5×'; }
+                                        
+                                        return `<div class="effectiveness-cell ${className}" style="padding: 2px; text-align: center;">
+                                            ${GENE_SYMBOLS[defendGene]}<br><span style="font-size: 9px;">${text}</span>
+                                        </div>`;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return `<div style="margin-bottom: 12px; padding: 10px; background: #f0f0f0; border-radius: 8px;">
                         <strong>${attack.gene}${attack.type === 'splash' ? ' Splash' : ''}</strong>
                         ${attack.type === 'splash' ? ' (hits all enemies for 50% damage)' : ' (single target)'}
-                    </div>`
-                ).join('');
-                
-                // Update effectiveness grid
-                const genes = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
-                effectivenessGrid.innerHTML = genes.map(defendGene => {
-                    const effectiveness = character.getEffectiveness(character.genes[0], {genes: [defendGene]});
-                    let className = 'normal';
-                    let text = '1.0×';
-                    
-                    if (effectiveness === 1.5) { className = 'super'; text = '1.5×'; }
-                    else if (effectiveness === 1.25) { className = 'effective'; text = '1.25×'; }
-                    else if (effectiveness === 0.75) { className = 'weak'; text = '0.75×'; }
-                    else if (effectiveness === 0.5) { className = 'very-weak'; text = '0.5×'; }
-                    
-                    return `<div class="effectiveness-cell ${className}">
-                        ${GENE_SYMBOLS[defendGene]}<br>${text}
+                        ${effectivenessHtml}
                     </div>`;
                 }).join('');
+
+                // Remove the old effectiveness section
+                const effectivenessSection = document.querySelector('.info-effectiveness');
+                if (effectivenessSection) {
+                    effectivenessSection.style.display = 'none';
+                }
                 
                 popup.classList.add('show');
             }
@@ -3739,20 +3896,20 @@
                         }
                     }
                     
-                    // For battle character selection
+                    // For battle character selection grid and selected team display
                     const selectionSlot = e.target.closest('.selection-slot');
-                    if (selectionSlot) {
-                        const sprite = selectionSlot.querySelector('.character-sprite');
-                        if (sprite) {
-                            // Find character by sprite comparison
-                            const unlockedChars = Object.values(this.characters).filter(char => char.unlocked);
-                            for (const char of unlockedChars) {
-                                const testSprite = document.createElement('div');
-                                this.updateCharacterSprite(testSprite, char);
-                                if (sprite.innerHTML === testSprite.innerHTML) {
-                                    this.showCharacterInfo(char.id);
-                                    break;
-                                }
+                    const selectedTeamSlot = e.target.closest('.selected-team-grid .character-slot');
+
+                    if (selectionSlot || selectedTeamSlot) {
+                        const sprite = (selectionSlot || selectedTeamSlot).querySelector('.character-sprite');
+                        if (sprite && !sprite.classList.contains('locked-sprite')) {
+                            // Build sprite map if needed
+                            this.buildSpriteMap();
+                            
+                            // Fast lookup using cached sprite map
+                            const characterId = this.spriteMap.get(sprite.innerHTML);
+                            if (characterId) {
+                                this.showCharacterInfo(characterId);
                             }
                         }
                     }
@@ -3812,6 +3969,7 @@
                 this.updateDisplay();
                 this.setupEventListeners();
                 this.updateBattleTeamSelection();
+                this.setupCharacterDoubleClick();
             }
 
             setupTabNavigation() {
@@ -3929,6 +4087,24 @@
                     sprite.style.removeProperty('--secondary-color');
                     sprite.style.removeProperty('--same-gene-gradient');
                 }
+            }
+
+            buildSpriteMap() {
+                if (!this.spriteMap) {
+                    this.spriteMap = new Map();
+                    Object.values(this.characters).forEach(char => {
+                        if (char.unlocked) {
+                            const testSprite = document.createElement('div');
+                            this.updateCharacterSprite(testSprite, char);
+                            this.spriteMap.set(testSprite.innerHTML, char.id);
+                        }
+                    });
+                }
+            }
+
+            rebuildSpriteMap() {
+                this.spriteMap = null;
+                this.buildSpriteMap();
             }
 
             selectCharacter(characterId) {
@@ -4305,6 +4481,7 @@
                     slot.addEventListener('click', () => this.selectCharacter(characterId));
                     setTimeout(() => slot.classList.remove('new-discovery'), 800);
                 }
+                this.rebuildSpriteMap();
             }
 
             createParticleEffect() {
@@ -4368,6 +4545,18 @@
                     radio.addEventListener('click', (e) => {
                         const speed = parseInt(e.target.dataset.speed);
                         this.setSpeed(speed);
+                    });
+                });
+
+                // Animation speed control listeners for battle (ADD THIS NEW CODE)
+                document.querySelectorAll('.speed-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const speed = parseInt(e.target.dataset.speed);
+                        this.battleSystem.setAnimationSpeed(speed);
+                        
+                        // Update UI
+                        document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+                        e.target.classList.add('active');
                     });
                 });
 
