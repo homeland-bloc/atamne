@@ -2340,15 +2340,18 @@
                 </div>
 
                 <div class="battle-controls" id="battleControls">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="font-weight: bold; color: #666;">
-                            <span id="activeCharacterName">Character</span>'s Turn
-                        </div>
-                        <button class="cancel-btn" id="quitBattleBtn" style="padding: 5px 15px; font-size: 12px;">Quit</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <div style="font-weight: bold; color: #666;">
+                        <span id="activeCharacterName">Character</span>'s Turn
                     </div>
-                    <div class="attack-buttons" id="attackButtons"></div>
-                    <div class="battle-log" id="battleLog"></div>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="battle-log-button" id="battleLogButton">📜 Logs</button>
+                        <button class="cancel-btn" id="quitBattleBtn" style="padding: 8px 12px; font-size: 12px;">Quit</button>
+                    </div>
                 </div>
+                <div class="attack-buttons" id="attackButtons"></div>
+                <div class="battle-log" id="battleLog"></div>
+            </div>
 
                 <div class="battle-log-modal" id="battleLogModal">
                     <div class="battle-log-modal-content">
@@ -3530,31 +3533,21 @@
                 
                 if (!currentChar) return;
                 
+                // Update the existing header (don't create a new one)
                 activeNameElement.textContent = currentChar.id;
 
-                // Create header HTML once
-                const headerHtml = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                        <div style="font-weight: bold; color: #666;">
-                            ${currentChar.id}'s Turn
-                        </div>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <button class="battle-log-button" id="battleLogButton">📜 Logs</button>
-                            <button class="cancel-btn" id="quitBattleBtn" style="padding: 8px 12px; font-size: 12px;">Quit</button>
-                        </div>
-                    </div>
-                `;
-
-                // Set header once for both player and enemy
-                attackButtonsElement.innerHTML = headerHtml;
-
-                // Add event listeners only if they don't exist
+                // Add event listeners only if they don't exist (for the existing header buttons)
                 if (!this.battleControlsInitialized) {
                     this.battleControlsInitialized = true;
                     
-                    // Use event delegation to avoid recreating listeners
-                    attackButtonsElement.addEventListener('click', (e) => {
-                        if (e.target.id === 'battleLogButton') {
+                    // Add event listeners to the existing header buttons
+                    const existingLogButton = document.getElementById('battleLogButton');
+                    const existingQuitButton = document.getElementById('quitBattleBtn');
+                    
+                    if (existingLogButton) {
+                        existingLogButton.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
                             const battleLogModal = document.getElementById('battleLogModal');
                             if (battleLogModal) {
                                 battleLogModal.classList.add('show');
@@ -3565,10 +3558,14 @@
                                     modalContent.scrollTop = modalContent.scrollHeight;
                                 }
                             }
-                        } else if (e.target.id === 'quitBattleBtn') {
+                        });
+                    }
+                    
+                    if (existingQuitButton) {
+                        existingQuitButton.addEventListener('click', () => {
                             this.showQuitConfirmation();
-                        }
-                    });
+                        });
+                    }
                 }
 
                 controlsElement.style.display = 'block';
@@ -3577,8 +3574,8 @@
                     const isMobile = window.innerWidth <= 768;
                     const currentCharAttack = this.selectedAttackGenes[currentChar.id];
                     
-                    // Add player interface after header
-                    attackButtonsElement.innerHTML += `
+                    // Only set the player interface content (no header)
+                    attackButtonsElement.innerHTML = `
                         <div style="margin-bottom: 10px; color: #666; font-size: 14px; font-weight: 500; text-align: center;">Select an attack:</div>
                         <div id="attackRow" style="display: flex; gap: ${isMobile ? '8px' : '12px'}; justify-content: center; flex-wrap: wrap; margin-bottom: 12px;"></div>
                         <div style="margin-bottom: 8px; color: #666; font-size: 14px; font-weight: 500; text-align: center;">Select a target:</div>
@@ -3671,7 +3668,8 @@
                         }
                     }
                 } else {
-                    attackButtonsElement.innerHTML += '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
+                    // Only set enemy content (no header)
+                    attackButtonsElement.innerHTML = '<div style="text-align: center; color: #666;">Enemy is thinking...</div>';
                 }
             }
 
