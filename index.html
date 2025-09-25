@@ -2181,6 +2181,25 @@
                 padding: 10px 8px;
             }
         }
+
+        @media (max-width: 768px) {
+            /* Hide battle arena completely when not active */
+            .battle-arena:not([style*="display: block"]) {
+                display: none !important;
+            }
+            
+            /* Ensure team setup is properly shown when battle arena is hidden */
+            .team-setup {
+                display: block !important;
+            }
+            
+            /* Additional rule to hide battle controls when not in battle */
+            body:not(.battle-active) .battle-controls,
+            body:not(.battle-active) .turn-order-bar,
+            body:not(.battle-active) .battle-field {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -2623,7 +2642,7 @@
                 this.ACTION_THRESHOLD = 1000; // Action bar threshold
                 this.isProcessingTurn = false; // Flag to prevent multiple attacks in one turn
                 this.attackButtonsDisabled = false; // Flag to disable attack buttons
-                this.animationSpeed = 1;
+                this.animationSpeed = gameInstance.battleSystem?.animationSpeed || 1;
                 this.selectedAttackGenes = {}; // Changed from single to object
                 this.persistentAttackMode = false;
                 this.battleControlsInitialized = false;
@@ -2768,6 +2787,10 @@
                 this.battleLog = [];
                 this.previousFirstTurn = null;
                 
+                // Preserve animation speed from previous battle
+                const currentSpeed = this.animationSpeed || 1;
+                this.setAnimationSpeed(currentSpeed);
+
                 // Reset attack button states
                 this.attackButtonsDisabled = false;
                 this.isProcessingTurn = false;
@@ -3202,58 +3225,65 @@
                 
                 for (const attackObj of attackObjs) {
                     if (attackObj.type === 'splash') {
-                        // Calculate total damage for splash attack
+                        // Only use splash if there are multiple targets
+                        if (availableTargets.length <= 1) {
+                            continue; // Skip splash attacks when only one target
+                        }
+                        
                         let totalDamage = 0;
                         let willKillCount = 0;
                         
                         for (const target of availableTargets) {
                             const effectiveness = attacker.getEffectiveness(attackObj.gene, target);
-                            const damage = Math.floor((attacker.stats.attack * effectiveness) / 2); // Splash is half damage
+                            const damage = Math.floor((attacker.stats.attack * effectiveness) / 2);
                             totalDamage += damage;
                             
                             if (damage >= target.hp) {
-                                willKillCount += 2; // Bonus for potential kills
+                                willKillCount += 3; // Higher bonus for kills
                             }
                         }
                         
-                        // Score based on total damage and kills
-                        const score = totalDamage + (willKillCount * 100);
+                        // Score based on total damage and kills, but penalize if low efficiency
+                        const avgEffectiveness = totalDamage / (attacker.stats.attack * availableTargets.length * 0.5);
+                        const score = totalDamage + (willKillCount * 200) + (avgEffectiveness * 50);
                         
                         if (score > bestScore) {
                             bestScore = score;
-                            bestMove = { attack: attackObj, target: availableTargets[0] }; // Target doesn't matter for splash
+                            bestMove = { attack: attackObj, target: availableTargets[0] };
                         }
                     } else {
-                        // Calculate best target for single attacks
+                        // Single attacks
                         for (const target of availableTargets) {
                             const effectiveness = attackObj.gene === 'Neutral' ? 1 : attacker.getEffectiveness(attackObj.gene, target);
                             const damage = Math.floor(attacker.stats.attack * effectiveness);
                             
-                            // Scoring factors:
                             let score = damage; // Base score is damage dealt
                             
-                            // Huge bonus for finishing off an enemy
+                            // Massive bonus for finishing off an enemy (prioritize kills)
                             if (damage >= target.hp) {
-                                score += 500;
+                                score += 1000;
+                            } else if (target.hp <= attacker.stats.attack * 1.5) {
+                                // Big bonus for hitting low HP enemies
+                                score += 300;
                             }
                             
-                            // Bonus for hitting low HP enemies (to finish them next turn)
-                            if (target.hp <= attacker.stats.attack * 1.5) {
+                            // Bonus for effectiveness
+                            if (effectiveness >= 1.25) {
+                                score += 100 * effectiveness;
+                            } else if (effectiveness <= 0.75) {
+                                score -= 50; // Penalty for weak attacks
+                            }
+                            
+                            // Consider threat level
+                            score += target.stats.attack * 0.2;
+                            
+                            // Bonus for low HP targets (prioritize finishing)
+                            const hpPercentage = target.hp / target.stats.maxHp;
+                            if (hpPercentage < 0.3) {
+                                score += 200;
+                            } else if (hpPercentage < 0.5) {
                                 score += 100;
                             }
-                            
-                            // Bonus for super effective moves
-                            if (effectiveness >= 1.25) {
-                                score += 50 * effectiveness;
-                            }
-                            
-                            // Small penalty for not very effective moves
-                            if (effectiveness <= 0.75) {
-                                score -= 25;
-                            }
-                            
-                            // Consider threat level (enemy's attack power)
-                            score += target.stats.attack * 0.3;
                             
                             if (score > bestScore) {
                                 bestScore = score;
@@ -3298,6 +3328,8 @@
             returnToSetup() {
                 this.battleControlsInitialized = false;
                 this.clearAllTimers();
+
+                document.body.classList.remove('battle-active');
                 
                 const teamSetup = document.getElementById('team-setup');
                 const battleArena = document.getElementById('battle-arena');
@@ -3417,6 +3449,9 @@
                 
                 if (teamSetup) teamSetup.style.display = 'none';
                 if (battleArena) battleArena.style.display = 'block';
+                
+                // Add class to body for CSS targeting
+                document.body.classList.add('battle-active');
                 
                 this.updateBattleDisplay();
                 
@@ -3620,6 +3655,10 @@
                         }
                         
                         button.addEventListener('click', () => {
+                            // Immediate disable to prevent spam
+                            button.disabled = true;
+                            attackRow.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                            
                             this.selectedAttackGenes[currentChar.id] = attackObj;
                             this.updateBattleControls(); // Refresh to show selection and targets
                         });
@@ -3639,8 +3678,9 @@
                                 button.addEventListener('click', async () => {
                                     if (this.isProcessingTurn) return;
                                     
-                                    // Disable all target buttons
-                                    targetRow.querySelectorAll('button').forEach(btn => btn.disabled = true);
+                                    // Immediately disable ALL buttons to prevent spam
+                                    const allButtons = document.querySelectorAll('.attack-btn');
+                                    allButtons.forEach(btn => btn.disabled = true);
                                     
                                     // Execute splash attack regardless of which target was clicked
                                     this.processTurn(currentCharAttack, null);
@@ -3656,8 +3696,9 @@
                                 button.addEventListener('click', async () => {
                                     if (this.isProcessingTurn) return;
                                     
-                                    const allTargetButtons = targetRow.querySelectorAll('button');
-                                    allTargetButtons.forEach(btn => btn.disabled = true);
+                                    // Immediately disable ALL buttons to prevent spam
+                                    const allButtons = document.querySelectorAll('.attack-btn');
+                                    allButtons.forEach(btn => btn.disabled = true);
                                     
                                     await this.showAttackAnimation(this.getCurrentCharacter(), target);
                                     this.processTurn(currentCharAttack, target);
@@ -3688,7 +3729,7 @@
                     button.style.background = `linear-gradient(45deg, ${GENE_COLORS[target.genes[0]]}, ${GENE_COLORS[target.genes[1]]})`;
                 }
                 
-                button.textContent = target.id + (isSplash ? ' (Splash)' : '');
+                button.textContent = target.id;
                 button.style.color = 'white';
                 button.style.textShadow = '1px 1px 2px rgba(0, 0, 0, 0.7)';
                 
@@ -3884,7 +3925,10 @@
             }
 
             setupCharacterDoubleClick() {
-                // For breeding table
+                // Track click timing for battle selection
+                this.clickTimeouts = new Map();
+                
+                // For breeding table and selected team display
                 document.addEventListener('dblclick', (e) => {
                     const slot = e.target.closest('.character-slot');
                     if (slot && slot.dataset.characterId) {
@@ -3908,6 +3952,32 @@
                             const characterId = this.spriteMap.get(sprite.innerHTML);
                             if (characterId) {
                                 this.showCharacterInfo(characterId);
+                            }
+                        }
+                    }
+                });
+                
+                // Handle single clicks for battle selection with delay to allow double-click
+                document.addEventListener('click', (e) => {
+                    const selectionSlot = e.target.closest('.selection-slot');
+                    if (selectionSlot) {
+                        const sprite = selectionSlot.querySelector('.character-sprite');
+                        if (sprite && !sprite.classList.contains('locked-sprite')) {
+                            this.buildSpriteMap();
+                            const characterId = this.spriteMap.get(sprite.innerHTML);
+                            if (characterId) {
+                                // Clear any existing timeout for this slot
+                                if (this.clickTimeouts.has(selectionSlot)) {
+                                    clearTimeout(this.clickTimeouts.get(selectionSlot));
+                                }
+                                
+                                // Set timeout for single click action
+                                const timeout = setTimeout(() => {
+                                    this.toggleBattleTeamSelection(characterId);
+                                    this.clickTimeouts.delete(selectionSlot);
+                                }, 250); // 250ms delay for single click
+                                
+                                this.clickTimeouts.set(selectionSlot, timeout);
                             }
                         }
                     }
@@ -4206,7 +4276,6 @@
                     this.updateCharacterSprite(sprite, character);
                     
                     slot.appendChild(sprite);
-                    slot.addEventListener('click', () => this.toggleBattleTeamSelection(character.id));
                     selectionGrid.appendChild(slot);
                 });
                 
