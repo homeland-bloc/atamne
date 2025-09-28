@@ -126,7 +126,7 @@
             border-radius: 10px;
         }
 
-        .breeding-table {
+        .fusion-table {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
             gap: 4px;
@@ -137,7 +137,7 @@
         }
 
         @media (min-width: 768px) {
-            .breeding-table {
+            .fusion-table {
                 gap: 12px;
                 margin-bottom: 30px;
                 max-width: 600px;
@@ -275,7 +275,7 @@
             border-top: 2px solid #e0e0e0;
         }
 
-        .reset-button, .breed-btn {
+        .reset-button, .fuse-btn {
             background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
             color: white;
             border: none;
@@ -289,29 +289,29 @@
             letter-spacing: 1px;
         }
 
-        .breed-btn {
+        .fuse-btn {
             background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
             padding: 15px 40px;
             font-size: 18px;
             border-radius: 50px;
         }
 
-        .reset-button:hover, .breed-btn:hover:not(:disabled) {
+        .reset-button:hover, .fuse-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
         }
 
-        .breed-btn:disabled {
+        .fuse-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
         }
 
-        .breed-btn.breeding {
-            animation: breedingPulse 0.5s ease-in-out infinite alternate;
+        .fuse-btn.fusion {
+            animation: fusionPulse 0.5s ease-in-out infinite alternate;
         }
 
-        @keyframes breedingPulse {
+        @keyframes fusionPulse {
             0% { transform: scale(1); }
             100% { transform: scale(1.05); }
         }
@@ -413,12 +413,12 @@
             z-index: -1;
         }
 
-        .breeding-controls {
+        .fusion-controls {
             text-align: center;
             margin-bottom: 20px;
         }
 
-        .breeding-preview {
+        .fusion-preview {
             position: fixed;
             top: 50%;
             left: 50%;
@@ -432,12 +432,12 @@
             overflow: hidden;
         }
 
-        .breeding-preview.show {
+        .fusion-preview.show {
             display: block;
-            animation: breedingPreviewPop 0.3s ease-out;
+            animation: fusionPreviewPop 0.3s ease-out;
         }
 
-        @keyframes breedingPreviewPop {
+        @keyframes fusionPreviewPop {
             0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
             100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
         }
@@ -512,7 +512,7 @@
             100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; }
         }
 
-        .breeding-sparkle {
+        .fusion-sparkle {
             position: absolute;
             width: 4px;
             height: 4px;
@@ -2183,15 +2183,16 @@
         }
 
         @media (max-width: 768px) {
-            /* Hide battle arena completely when not active */
-            .battle-arena:not([style*="display: block"]) {
-                display: none !important;
-            }
-            
-            /* Ensure team setup is properly shown when battle arena is hidden */
-            .team-setup {
+            /* Only show team-setup when not in battle */
+            body:not(.battle-active) .team-setup {
                 display: block !important;
             }
+            
+            /* Hide team-setup during battle */
+            body.battle-active .team-setup {
+                display: none !important;
+            }
+
             
             /* Additional rule to hide battle controls when not in battle */
             body:not(.battle-active) .battle-controls,
@@ -2205,10 +2206,10 @@
 <body>
     <div class="game-container">
         <div class="game-header">
-            <h1 class="game-title">Gene Breeding & Battle Simulator</h1>
+            <h1 class="game-title">Genetic Fusion & Battle Simulator</h1>
             
             <div class="tab-navigation">
-                <button class="tab-button active" data-tab="breeding">🧬 Breeding Lab</button>
+                <button class="tab-button active" data-tab="fusion">🧬 Fusion Lab</button>
                 <button class="tab-button" data-tab="battle">⚔️ Battle Arena</button>
             </div>
         </div>
@@ -2220,8 +2221,8 @@
             <button class="speed-btn" data-speed="4">4x</button>
         </div>
 
-        <!-- BREEDING TAB -->
-        <div class="tab-content active" id="breeding-tab">
+        <!-- Fusion TAB -->
+        <div class="tab-content active" id="fusion-tab">
             <div class="game-header-controls">
                 <div class="progress-section">
                     <div class="progress-bar">
@@ -2243,7 +2244,7 @@
                 <div class="gene-label" style="background: #666;">Singles</div>
             </div>
 
-            <div class="breeding-table" id="breedingTable"></div>
+            <div class="fusion-table" id="fusionTable"></div>
 
             <div class="bot-control">
                 <div class="control-row">
@@ -2291,8 +2292,8 @@
                 </div>
             </div>
 
-            <div class="breeding-controls">
-                <button class="breed-btn" id="breedBtn" disabled>Select Two Creatures to Breed</button>
+            <div class="fusion-controls">
+                <button class="fuse-btn" id="fuseBtn" disabled>Select Two Creatures to Fuse</button>
             </div>
 
             <div class="reset-section">
@@ -2397,15 +2398,15 @@
         </div>
     </div>
 
-    <div class="breeding-preview" id="breedingPreview">
-        <h3 style="text-align: center; margin-bottom: 20px; color: #666;">Breeding...</h3>
+    <div class="fusion-preview" id="fusionPreview">
+        <h3 style="text-align: center; margin-bottom: 20px; color: #666;">Fusion...</h3>
         <div class="preview-character" id="previewCharacter">?</div>
     </div>
 
     <div class="victory-message" id="victoryMessage">
         <h2 style="color: #4ecdc4; margin-bottom: 20px;">🎉 Congratulations! 🎉</h2>
         <p style="font-size: 18px; color: #666;">You've discovered all 42 gene combinations!</p>
-        <p style="margin-top: 10px; color: #999;">Master breeder achievement unlocked!</p>
+        <p style="margin-top: 10px; color: #999;">Fusion master achievement unlocked!</p>
     </div>
 
     <div class="character-info-popup" id="characterInfoPopup">
@@ -3225,64 +3226,83 @@
                 
                 for (const attackObj of attackObjs) {
                     if (attackObj.type === 'splash') {
-                        // Only use splash if there are multiple targets
+                        // Only use splash if there are multiple targets AND it's actually beneficial
                         if (availableTargets.length <= 1) {
                             continue; // Skip splash attacks when only one target
                         }
                         
                         let totalDamage = 0;
-                        let willKillCount = 0;
+                        let killCount = 0;
+                        let totalTargetValue = 0;
                         
                         for (const target of availableTargets) {
                             const effectiveness = attacker.getEffectiveness(attackObj.gene, target);
                             const damage = Math.floor((attacker.stats.attack * effectiveness) / 2);
                             totalDamage += damage;
+                            totalTargetValue += target.stats.attack; // Factor in target threat level
                             
                             if (damage >= target.hp) {
-                                willKillCount += 3; // Higher bonus for kills
+                                killCount++;
                             }
                         }
                         
-                        // Score based on total damage and kills, but penalize if low efficiency
-                        const avgEffectiveness = totalDamage / (attacker.stats.attack * availableTargets.length * 0.5);
-                        const score = totalDamage + (willKillCount * 200) + (avgEffectiveness * 50);
-                        
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMove = { attack: attackObj, target: availableTargets[0] };
+                        // Only use splash if it can kill at least 2 targets OR deals significant total damage
+                        if (killCount >= 2 || (totalDamage > attacker.stats.attack * 1.5 && availableTargets.length >= 3)) {
+                            const score = totalDamage + (killCount * 500) + (totalTargetValue * 0.1);
+                            
+                            if (score > bestScore) {
+                                bestScore = score;
+                                bestMove = { attack: attackObj, target: availableTargets[0] };
+                            }
                         }
                     } else {
-                        // Single attacks
+                        // Single attacks - prioritize finishing kills and effectiveness
                         for (const target of availableTargets) {
                             const effectiveness = attackObj.gene === 'Neutral' ? 1 : attacker.getEffectiveness(attackObj.gene, target);
                             const damage = Math.floor(attacker.stats.attack * effectiveness);
                             
-                            let score = damage; // Base score is damage dealt
+                            let score = 0;
                             
-                            // Massive bonus for finishing off an enemy (prioritize kills)
+                            // MASSIVE bonus for killing an enemy (top priority)
                             if (damage >= target.hp) {
-                                score += 1000;
-                            } else if (target.hp <= attacker.stats.attack * 1.5) {
-                                // Big bonus for hitting low HP enemies
-                                score += 300;
-                            }
-                            
-                            // Bonus for effectiveness
-                            if (effectiveness >= 1.25) {
-                                score += 100 * effectiveness;
-                            } else if (effectiveness <= 0.75) {
-                                score -= 50; // Penalty for weak attacks
-                            }
-                            
-                            // Consider threat level
-                            score += target.stats.attack * 0.2;
-                            
-                            // Bonus for low HP targets (prioritize finishing)
-                            const hpPercentage = target.hp / target.stats.maxHp;
-                            if (hpPercentage < 0.3) {
-                                score += 200;
-                            } else if (hpPercentage < 0.5) {
-                                score += 100;
+                                score += 2000; // Increased from 1000
+                                
+                                // Extra bonus for killing high-threat targets
+                                score += target.stats.attack * 2;
+                                
+                                // Bonus for effectiveness on kills
+                                if (effectiveness >= 1.25) {
+                                    score += 300;
+                                }
+                            } else {
+                                // Base damage score (only if not killing)
+                                score += damage;
+                                
+                                // Bonus for bringing target into kill range for next turn
+                                const remainingHp = target.hp - damage;
+                                if (remainingHp <= attacker.stats.attack * 1.5) {
+                                    score += 400; // Bonus for setting up kills
+                                }
+                                
+                                // Effectiveness bonuses (reduced when not killing)
+                                if (effectiveness >= 1.5) {
+                                    score += 200;
+                                } else if (effectiveness >= 1.25) {
+                                    score += 100;
+                                } else if (effectiveness <= 0.75) {
+                                    score -= 200; // Heavy penalty for ineffective attacks
+                                }
+                                
+                                // Consider target threat level
+                                score += target.stats.attack * 0.3;
+                                
+                                // Bonus for hitting already wounded enemies
+                                const hpPercentage = target.hp / target.stats.maxHp;
+                                if (hpPercentage < 0.4) {
+                                    score += 300; // Focus fire on wounded targets
+                                } else if (hpPercentage < 0.6) {
+                                    score += 150;
+                                }
                             }
                             
                             if (score > bestScore) {
@@ -3293,6 +3313,7 @@
                     }
                 }
                 
+                // Fallback to any available move if no good move found
                 return bestMove || { 
                     attack: attackObjs[0], 
                     target: availableTargets[0] 
@@ -3843,7 +3864,7 @@
             }
         }
 
-        class BreedingGame {
+        class FusionGame {
             constructor() {
                 this.characters = this.generateCharacters();
                 this.selectedCharacters = [];
@@ -3928,7 +3949,7 @@
                 // Track click timing for battle selection
                 this.clickTimeouts = new Map();
                 
-                // For breeding table and selected team display
+                // For fusion table and selected team display
                 document.addEventListener('dblclick', (e) => {
                     const slot = e.target.closest('.character-slot');
                     if (slot && slot.dataset.characterId) {
@@ -4070,7 +4091,7 @@
             }
 
             createTable() {
-                const table = document.getElementById('breedingTable');
+                const table = document.getElementById('fusionTable');
                 table.innerHTML = '';
 
                 // Create 7x6 grid: 6 columns for double genes + 1 column for singles
@@ -4206,17 +4227,17 @@
                 this.updateParentDisplay('parent1Display', this.selectedCharacters[0]);
                 this.updateParentDisplay('parent2Display', this.selectedCharacters[1]);
 
-                // Update breed button
-                const breedBtn = document.getElementById('breedBtn');
+                // Update fuse button
+                const fuseBtn = document.getElementById('fuseBtn');
                 if (this.botActive) {
-                    breedBtn.disabled = true;
-                    breedBtn.textContent = 'Bot is in Control';
+                    fuseBtn.disabled = true;
+                    fuseBtn.textContent = 'Bot is in Control';
                 } else if (this.selectedCharacters.length === 2) {
-                    breedBtn.disabled = false;
-                    breedBtn.textContent = 'Breed Creatures';
+                    fuseBtn.disabled = false;
+                    fuseBtn.textContent = 'Fuse Creatures';
                 } else {
-                    breedBtn.disabled = true;
-                    breedBtn.textContent = 'Select Two Creatures to Breed';
+                    fuseBtn.disabled = true;
+                    fuseBtn.textContent = 'Select Two Creatures to Fuse';
                 }
 
                 // Update progress
@@ -4279,18 +4300,48 @@
                     selectionGrid.appendChild(slot);
                 });
                 
-                // Update selected team display
+                // Update selected team display with removal buttons
                 selectedTeamDisplay.innerHTML = '';
                 this.selectedBattleTeam.forEach(charId => {
                     const character = this.characters[charId];
                     const slot = document.createElement('div');
                     slot.className = 'character-slot unlocked';
+                    slot.style.position = 'relative';
                     
                     const sprite = document.createElement('div');
                     sprite.className = 'character-sprite';
                     this.updateCharacterSprite(sprite, character);
                     
+                    // Add X button for removal
+                    const removeBtn = document.createElement('button');
+                    removeBtn.textContent = '×';
+                    removeBtn.style.cssText = `
+                        position: absolute;
+                        top: -5px;
+                        right: -5px;
+                        width: 20px;
+                        height: 20px;
+                        border-radius: 50%;
+                        background: #ff6b6b;
+                        color: white;
+                        border: none;
+                        font-size: 12px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        z-index: 10;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    `;
+                    
+                    removeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.selectedBattleTeam = this.selectedBattleTeam.filter(id => id !== charId);
+                        this.updateBattleTeamSelection();
+                    });
+                    
                     slot.appendChild(sprite);
+                    slot.appendChild(removeBtn);
                     selectedTeamDisplay.appendChild(slot);
                 });
                 
@@ -4352,7 +4403,7 @@
                 this.battleSystem.setupBattle(playerTeam);
             }
 
-            breed() {
+            fuse() {
                 if (this.selectedCharacters.length !== 2) return;
 
                 const parent1 = this.characters[this.selectedCharacters[0]];
@@ -4361,21 +4412,21 @@
                 const possibleOffspring = this.getPossibleOffspring(parent1, parent2);
                 const lockedOffspring = possibleOffspring.filter(id => !this.characters[id].unlocked);
 
-                this.startBreedingAnimation(possibleOffspring, lockedOffspring);
+                this.startFusionAnimation(possibleOffspring, lockedOffspring);
             }
 
-            startBreedingAnimation(possibleOffspring, lockedOffspring) {
-                const breedBtn = document.getElementById('breedBtn');
-                const preview = document.getElementById('breedingPreview');
+            startFusionAnimation(possibleOffspring, lockedOffspring) {
+                const fuseBtn = document.getElementById('fuseBtn');
+                const preview = document.getElementById('fusionPreview');
                 const previewChar = document.getElementById('previewCharacter');
                 
                 const actualResult = lockedOffspring.length > 0 ? 
                     lockedOffspring[Math.floor(Math.random() * lockedOffspring.length)] : 
                     possibleOffspring[Math.floor(Math.random() * possibleOffspring.length)];
                 
-                breedBtn.disabled = true;
-                breedBtn.classList.add('breeding');
-                breedBtn.textContent = 'Breeding...';
+                fuseBtn.disabled = true;
+                fuseBtn.classList.add('fusion');
+                fuseBtn.textContent = 'Fusion...';
                 
                 preview.classList.add('show');
                 
@@ -4393,7 +4444,7 @@
                     }
                     
                     this.updatePreviewCharacter(previewChar, displayCharacter);
-                    this.createBreedingSparkles(previewChar, this.speedMultiplier > 1);
+                    this.createFusionSparkles(previewChar, this.speedMultiplier > 1);
                     
                     animationStep++;
                     
@@ -4454,18 +4505,18 @@
                 
                 setTimeout(() => {
                     sunshine.remove();
-                    this.finishBreeding(lockedOffspring, actualResult);
+                    this.finishFusion(lockedOffspring, actualResult);
                 }, Math.floor(2000 / this.speedMultiplier));
             }
 
-            createBreedingSparkles(container, isFastMode = false) {
+            createFusionSparkles(container, isFastMode = false) {
                 const sparkleCount = isFastMode ? 3 : 5;
                 const duration = isFastMode ? Math.floor(400 / this.speedMultiplier) : Math.floor(800 / this.speedMultiplier);
                 
                 for (let i = 0; i < sparkleCount; i++) {
                     setTimeout(() => {
                         const sparkle = document.createElement('div');
-                        sparkle.className = 'breeding-sparkle';
+                        sparkle.className = 'fusion-sparkle';
                         
                         const angle = (Math.PI * 2 * i) / sparkleCount;
                         const radius = 60 + Math.random() * 20;
@@ -4492,9 +4543,9 @@
                 }
             }
 
-            finishBreeding(lockedOffspring, actualResult) {
-                const breedBtn = document.getElementById('breedBtn');
-                const preview = document.getElementById('breedingPreview');
+            finishFusion(lockedOffspring, actualResult) {
+                const fuseBtn = document.getElementById('fuseBtn');
+                const preview = document.getElementById('fusionPreview');
                 
                 setTimeout(() => {
                     preview.classList.remove('show');
@@ -4504,8 +4555,8 @@
                         this.createParticleEffect();
                     }
 
-                    breedBtn.classList.remove('breeding');
-                    breedBtn.disabled = false;
+                    fuseBtn.classList.remove('fusion');
+                    fuseBtn.disabled = false;
                     
                     this.selectedCharacters = [];
                     this.updateDisplay();
@@ -4588,7 +4639,7 @@
             }
 
             setupEventListeners() {
-                document.getElementById('breedBtn').addEventListener('click', () => this.breed());
+                document.getElementById('fuseBtn').addEventListener('click', () => this.fuse());
                 document.getElementById('botToggle').addEventListener('change', (e) => this.toggleBot(e.target.checked));
                 document.getElementById('resetButton').addEventListener('click', () => this.showResetConfirmation());
                 document.getElementById('confirmReset').addEventListener('click', () => this.confirmReset());
@@ -4710,8 +4761,8 @@
                 });
                 document.querySelector('[data-speed="1"]').classList.add('active');
                 
-                // Return to breeding tab
-                document.querySelector('[data-tab="breeding"]').click();
+                // Return to Fusion Tab
+                document.querySelector('[data-tab="fusion"]').click();
                 
                 this.createTable();
                 this.updateDisplay();
@@ -4739,14 +4790,14 @@
                 this.botInterval = setInterval(() => {
                     if (!this.botActive) return;
                     
-                    const bestPair = this.findBestBreedingPair();
+                    const bestPair = this.findBestFusionPair();
                     if (bestPair) {
                         this.selectedCharacters = bestPair;
                         this.updateDisplay();
                         
                         setTimeout(() => {
                             if (this.botActive) {
-                                this.breed();
+                                this.fuse();
                             }
                         }, 1000);
                     }
@@ -4762,7 +4813,7 @@
                 this.updateDisplay();
             }
 
-            findBestBreedingPair() {
+            findBestFusionPair() {
                 const unlockedCharacters = Object.keys(this.characters).filter(id => this.characters[id].unlocked);
                 const lockedCharacters = Object.keys(this.characters).filter(id => !this.characters[id].unlocked);
                 
@@ -4791,7 +4842,7 @@
         }
 
         // Start the game
-        new BreedingGame();
+        new FusionGame();
     </script>
 </body>
 </html>
