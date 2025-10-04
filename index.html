@@ -867,7 +867,7 @@
         }
 
         .team-title {
-            text-align: center;
+            text-align: right;
             font-weight: bold;
             color: #666;
             font-size: 18px;
@@ -2545,13 +2545,13 @@
 
         // Class Boost system
         const CLASS_BOOSTS = {
-            'Blue': { description: '+1⚡ to Your Team', type: 'teammate', stat: 'speed', value: 1 },
-            'Red': { description: '+4⚔️ to Your Team', type: 'teammate', stat: 'attack', value: 4 },
-            'Yellow': { description: '+16❤️ to Your Team', type: 'teammate', stat: 'hp', value: 16 },
-            'Orange': { description: '-1⚡ to Enemy Team', type: 'enemy', stat: 'speed', value: -1 },
-            'Green': { description: '-4⚔️ to Enemy Team', type: 'enemy', stat: 'attack', value: -4 },
-            'Purple': { description: '-16❤️ to Enemy Team', type: 'enemy', stat: 'hp', value: -16 },
-            'Neutral': { description: 'Neutral ⇶ (1/2 ⚔️)', type: 'special' },
+            'Blue': { description: '+1⚡ to all teammates', type: 'teammate', stat: 'speed', value: 1 },
+            'Red': { description: '+4⚔️ to all teammates', type: 'teammate', stat: 'attack', value: 4 },
+            'Yellow': { description: '+16❤️ to all teammates', type: 'teammate', stat: 'hp', value: 16 },
+            'Orange': { description: '-1⚡ to all enemies', type: 'enemy', stat: 'speed', value: -1 },
+            'Green': { description: '-4⚔️ to all enemies', type: 'enemy', stat: 'attack', value: -4 },
+            'Purple': { description: '-16❤️ to all enemies', type: 'enemy', stat: 'hp', value: -16 },
+            'Neutral': { description: 'Neutral ⇶ (3/4 ⚔️)', type: 'special' },
             'Splash': { description: '3/4 ⚔️ for ⇶', type: 'special' }
         };
 
@@ -2643,9 +2643,9 @@
                 const contributions = {};
                 
                 if (this.genes.length === 1) {
-                    // Single gene characters contribute 1 count to their gene and 1 to Neutral
+                    // Single gene characters contribute 2 counts to their gene and 1 to Neutral
                     const gene = this.genes[0];
-                    contributions[gene] = 1;
+                    contributions[gene] = 2; // Changed from 1 to 2
                     contributions['Neutral'] = 1;
                 } else if (this.genes[0] === this.genes[1]) {
                     // Same gene doubles contribute 2 counts to their gene and 1 to Splash
@@ -2664,17 +2664,44 @@
             getActiveClassBoosts(teamContributions) {
                 const activeBoosts = [];
                 
-                for (const [gene, count] of Object.entries(teamContributions)) {
-                    if (count >= 3 && CLASS_BOOSTS[gene]) {
+                // Check for level 2 boosts first (4+ points, gene colors only)
+                const geneColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+                for (const gene of geneColors) {
+                    const count = teamContributions[gene] || 0;
+                    if (count >= 4 && CLASS_BOOSTS[gene]) {
                         activeBoosts.push({
                             gene: gene,
+                            level: 2,
+                            description: CLASS_BOOSTS[gene].description.replace(/[+-]\d+/, (match) => {
+                                const num = parseInt(match);
+                                return (num > 0 ? '+' : '') + (num * 2);
+                            }),
+                            type: CLASS_BOOSTS[gene].type,
+                            stat: CLASS_BOOSTS[gene].stat,
+                            value: CLASS_BOOSTS[gene].value * 2
+                        });
+                    } else if (count >= 2 && CLASS_BOOSTS[gene]) {
+                        activeBoosts.push({
+                            gene: gene,
+                            level: 1,
                             ...CLASS_BOOSTS[gene]
                         });
                     }
                 }
                 
-                // Limit to 2 active boosts maximum
-                return activeBoosts;
+                // Check for Neutral and Splash (only need 2 points, no level 2)
+                for (const [gene, count] of Object.entries(teamContributions)) {
+                    if ((gene === 'Neutral' || gene === 'Splash') && count >= 2 && CLASS_BOOSTS[gene]) {
+                        activeBoosts.push({
+                            gene: gene,
+                            level: 1,
+                            ...CLASS_BOOSTS[gene]
+                        });
+                    }
+                }
+                
+                // Limit to 3 active boosts maximum (increased from 2)
+                return activeBoosts.slice(0, 3);
             }
 
             hashCode(str) {
@@ -2721,7 +2748,7 @@
                 const baseDamage = this.stats.attack;
                 const effectiveness = this.getEffectiveness(attackGene, defendingCharacter);
                 
-                // Check for Dove of Peace boost (Neutral becomes splash at 75%)
+                // Check for Neutral boost (Neutral becomes splash at 75%)
                 const hasNeutralBoost = activeBoosts.some(boost => boost.gene === 'Neutral');
                 if (attackGene === 'Neutral' && hasNeutralBoost) {
                     // This will be handled in processSplashAttack with 75% damage
@@ -3250,11 +3277,11 @@
             async processSingleAttack(attacker, attackGene, targetCharacter) {
                 const activeBoosts = attacker.isPlayer ? this.playerActiveBoosts : this.enemyActiveBoosts;
                 
-                // Check for Neutral boost (Neutral becomes splash at 50%)
+                // Check for Neutral boost (Neutral becomes splash at 75%)
                 const hasNeutralBoost = activeBoosts && activeBoosts.some(boost => boost.gene === 'Neutral');
                 if (attackGene === 'Neutral' && hasNeutralBoost) {
-                    // Convert to splash attack at 50% damage
-                    await this.processSplashAttack(attacker, attackGene, 0.5);
+                    // Convert to splash attack at 75% damage
+                    await this.processSplashAttack(attacker, attackGene, 0.75);
                     return;
                 }
                 
@@ -3458,44 +3485,46 @@
                             
                             // MASSIVE bonus for killing an enemy (top priority)
                             if (damage >= target.hp) {
-                                score += 2000; // Increased from 1000
+                                score += 3000; // Increased from 2000
                                 
                                 // Extra bonus for killing high-threat targets
                                 score += target.stats.attack * 2;
                                 
                                 // Bonus for effectiveness on kills
                                 if (effectiveness >= 1.25) {
-                                    score += 300;
+                                    score += 400;
                                 }
                             } else {
                                 // Base damage score (only if not killing)
                                 score += damage;
                                 
+                                // HEAVILY prioritize low HP targets when no kills available
+                                const hpPercentage = target.hp / target.stats.maxHp;
+                                if (hpPercentage < 0.3) {
+                                    score += 800; // Increased from 300
+                                } else if (hpPercentage < 0.5) {
+                                    score += 400; // Increased from 150
+                                }
+                                
                                 // Bonus for bringing target into kill range for next turn
                                 const remainingHp = target.hp - damage;
-                                if (remainingHp <= attacker.stats.attack * 1.5) {
-                                    score += 400; // Bonus for setting up kills
+                                if (remainingHp <= attacker.stats.attack * 1.5 && remainingHp > 0) {
+                                    score += 500; // Increased from 400
                                 }
                                 
-                                // Effectiveness bonuses (reduced when not killing)
+                                // Effectiveness bonuses/penalties
                                 if (effectiveness >= 1.5) {
-                                    score += 200;
+                                    score += 300;
                                 } else if (effectiveness >= 1.25) {
-                                    score += 100;
-                                } else if (effectiveness <= 0.75) {
-                                    score -= 200; // Heavy penalty for ineffective attacks
-                                }
-                                
-                                // Consider target threat level
-                                score += target.stats.attack * 0.3;
-                                
-                                // Bonus for hitting already wounded enemies
-                                const hpPercentage = target.hp / target.stats.maxHp;
-                                if (hpPercentage < 0.4) {
-                                    score += 300; // Focus fire on wounded targets
-                                } else if (hpPercentage < 0.6) {
                                     score += 150;
+                                } else if (effectiveness < 1.0 && effectiveness >= 0.75) {
+                                    score -= 600; // Massively increased penalty from -200
+                                } else if (effectiveness < 0.75) {
+                                    score -= 1200; // Extreme penalty for very bad effectiveness
                                 }
+                                
+                                // Consider target threat level (reduced weight)
+                                score += target.stats.attack * 0.2;
                             }
                             
                             if (score > bestScore) {
@@ -3719,14 +3748,16 @@
                 if (this.playerActiveBoosts && this.playerActiveBoosts.length > 0) {
                     const boostDisplay = document.createElement('div');
                     boostDisplay.className = 'class-boosts-display';
-                    boostDisplay.style.cssText = 'position: absolute; top: 10px; left: 10px; font-size: 11px; color: #4ecdc4; font-weight: bold; line-height: 1.3; background: rgba(255,255,255,0.9); padding: 6px 8px; border-radius: 6px; z-index: 10;';
+                    boostDisplay.style.cssText = 'position: absolute; top: 5px; left: 10px; font-size: 10px; color: #4ecdc4; font-weight: bold; line-height: 1.2; background: rgba(255,255,255,0.9); padding: 5px 7px; border-radius: 6px; z-index: 10; max-width: calc(100% - 20px);';
                     
                     const boostTexts = this.playerActiveBoosts.map(boost => {
                         const emoji = this.getBoostEmoji(boost.gene);
-                        return `${emoji}${boost.description}`;
+                        const isBold = boost.level === 2;
+                        const textStyle = isBold ? 'font-weight: 900;' : '';
+                        return `<div style="${textStyle}">${emoji}${boost.description}</div>`;
                     });
                     
-                    boostDisplay.innerHTML = `Class Boosts:<br>${boostTexts.join('<br>')}`;
+                    boostDisplay.innerHTML = `<div style="margin-bottom: 3px;">Class Boosts:</div>${boostTexts.join('')}`;
                     playerTeamSection.style.position = 'relative';
                     playerTeamSection.appendChild(boostDisplay);
                 }
@@ -3740,14 +3771,16 @@
                 if (this.enemyActiveBoosts && this.enemyActiveBoosts.length > 0) {
                     const boostDisplay = document.createElement('div');
                     boostDisplay.className = 'class-boosts-display';
-                    boostDisplay.style.cssText = 'position: absolute; top: 10px; left: 10px; font-size: 11px; color: #ff6b6b; font-weight: bold; line-height: 1.3; background: rgba(255,255,255,0.9); padding: 6px 8px; border-radius: 6px; z-index: 10;';
+                    boostDisplay.style.cssText = 'position: absolute; top: 5px; left: 10px; font-size: 10px; color: #ff6b6b; font-weight: bold; line-height: 1.2; background: rgba(255,255,255,0.9); padding: 5px 7px; border-radius: 6px; z-index: 10; max-width: calc(100% - 20px);';
                     
                     const boostTexts = this.enemyActiveBoosts.map(boost => {
                         const emoji = this.getBoostEmoji(boost.gene);
-                        return `${emoji}${boost.description}`;
+                        const isBold = boost.level === 2;
+                        const textStyle = isBold ? 'font-weight: 900;' : '';
+                        return `<div style="${textStyle}">${emoji}${boost.description}</div>`;
                     });
                     
-                    boostDisplay.innerHTML = `Class Boosts:<br>${boostTexts.join('<br>')}`;
+                    boostDisplay.innerHTML = `<div style="margin-bottom: 3px;">Class Boosts:</div>${boostTexts.join('')}`;
                     enemyTeamSection.style.position = 'relative';
                     enemyTeamSection.appendChild(boostDisplay);
                 }
@@ -3951,9 +3984,11 @@
                     // Set button text and styling
                     this.setAttackButtonContent(button, attackObj, hasNeutralBoost);
                     
-                    button.addEventListener('click', () => {
+                    button.addEventListener('click', (e) => {
                         // Immediate disable to prevent spam
-                        button.disabled = true;
+                        e.target.disabled = true;
+                        if (this.attackButtonsDisabled) return;
+                        
                         attackRow.querySelectorAll('button').forEach(btn => btn.disabled = true);
                         
                         this.selectedAttackGenes[currentChar.id] = attackObj;
@@ -4005,9 +4040,13 @@
                 availableTargets.forEach(target => {
                     const button = this.createTargetButton(target, isMobile, true, currentCharAttack);
                     
-                    button.addEventListener('click', async () => {
-                        if (this.isProcessingTurn) return;
+                    button.addEventListener('click', async (e) => {
+                        // Immediate disable - prevent spam
+                        e.target.disabled = true;
+                        if (this.isProcessingTurn || this.attackButtonsDisabled) return;
                         
+                        // Disable ALL buttons immediately and synchronously
+                        this.attackButtonsDisabled = true;
                         const allButtons = document.querySelectorAll('.attack-btn');
                         allButtons.forEach(btn => btn.disabled = true);
                         
@@ -4024,9 +4063,13 @@
                 availableTargets.forEach(target => {
                     const button = this.createTargetButton(target, isMobile, false, currentCharAttack);
                     
-                    button.addEventListener('click', async () => {
-                        if (this.isProcessingTurn) return;
+                    button.addEventListener('click', async (e) => {
+                        // Immediate disable - prevent spam
+                        e.target.disabled = true;
+                        if (this.isProcessingTurn || this.attackButtonsDisabled) return;
                         
+                        // Disable ALL buttons immediately and synchronously
+                        this.attackButtonsDisabled = true;
                         const allButtons = document.querySelectorAll('.attack-btn');
                         allButtons.forEach(btn => btn.disabled = true);
                         
@@ -4244,10 +4287,14 @@
                 topRow.className = 'compact-top-row';
                 topRow.style.cssText = 'display: flex; gap: 20px; margin-bottom: 15px; align-items: flex-start;';
                 
-                // Left: Sprite and name
+                // Left: Sprite and name (without stats)
                 const leftSide = document.createElement('div');
                 leftSide.style.cssText = 'display: flex; flex-direction: column; align-items: center; min-width: 120px;';
-                leftSide.innerHTML = infoDisplay.innerHTML;
+                // Only copy sprite and name, not the stats
+                const spriteElement = infoDisplay.querySelector('.info-character-sprite');
+                const nameElement = infoDisplay.querySelector('h3');
+                if (spriteElement) leftSide.appendChild(spriteElement.cloneNode(true));
+                if (nameElement) leftSide.appendChild(nameElement.cloneNode(true));
                 
                 // Right: Class boosts
                 const rightSide = document.createElement('div');
@@ -4259,13 +4306,37 @@
                 for (const [gene, count] of Object.entries(contributions)) {
                     if (CLASS_BOOSTS[gene]) {
                         const emoji = this.battleSystem.getBoostEmoji(gene);
+                        const geneColors = ['Red', 'Orange', 'Yellow', 'Green', 'Blue', 'Purple'];
+                        
+                        // Determine boost level and requirements
+                        let boostInfo = '';
+                        if (geneColors.includes(gene)) {
+                            if (count >= 4) {
+                                const doubledDesc = CLASS_BOOSTS[gene].description.replace(/[+-]\d+/, (match) => {
+                                    const num = parseInt(match);
+                                    return (num > 0 ? '+' : '') + (num * 2);
+                                });
+                                boostInfo = `<span style="color: #4ecdc4; font-weight: 900;">${emoji}${doubledDesc} (Lv2)</span>`;
+                            } else if (count >= 2) {
+                                boostInfo = `<span style="color: #4ecdc4;">${emoji}${CLASS_BOOSTS[gene].description} (Lv1)</span>`;
+                            } else {
+                                boostInfo = `<span style="color: #999;">${emoji}${CLASS_BOOSTS[gene].description} (need ${2-count} more)</span>`;
+                            }
+                        } else {
+                            // Neutral or Splash
+                            if (count >= 2) {
+                                boostInfo = `<span style="color: #4ecdc4;">${emoji}${CLASS_BOOSTS[gene].description}</span>`;
+                            } else {
+                                boostInfo = `<span style="color: #999;">${emoji}${CLASS_BOOSTS[gene].description} (need ${2-count} more)</span>`;
+                            }
+                        }
+                        
                         boostHtml += `<div style="margin: 4px 0; font-size: 12px;">
-                            <strong>${gene}:</strong> ${count} point${count > 1 ? 's' : ''} 
-                            <span style="color: #4ecdc4;">${emoji}${CLASS_BOOSTS[gene].description}</span>
+                            <strong>${gene}:</strong> ${count} point${count > 1 ? 's' : ''} ${boostInfo}
                         </div>`;
                     }
                 }
-                boostHtml += '<div style="font-size: 10px; color: #999; margin-top: 6px; font-style: italic;">Need 3+ points to activate (max 2 boosts)</div>';
+                boostHtml += '<div style="font-size: 10px; color: #999; margin-top: 6px; font-style: italic;">Gene colors: 2pts=Lv1, 4pts=Lv2 (max 3 boosts)</div>';
                 rightSide.innerHTML = boostHtml;
                 
                 topRow.appendChild(leftSide);
